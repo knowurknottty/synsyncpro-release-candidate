@@ -1,0 +1,20 @@
+{
+  "name": "SynSync Professional",
+  "short_name": "SynSync",
+  "description": "Research-Optimized Brainwave Entrainment Application",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0B0C15",
+  "theme_color": "#FFB000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3003/3003212.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "productivity", "utilities"]
+}

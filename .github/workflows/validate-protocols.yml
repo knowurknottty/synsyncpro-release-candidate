@@ -1,0 +1,17 @@
+name: Protocol Validation
+
+on:
+  push:
+    branches: [main, rvp-*]
+    paths: ['services/**', 'scripts/**', 'types.ts', 'constants.ts']
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm ci
+      - run: npm run validate:protocols

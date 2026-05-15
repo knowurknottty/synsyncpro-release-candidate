@@ -1,0 +1,49 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Root → landing page
+[[redirects]]
+  from   = "/"
+  to     = "/main.html"
+  status = 200
+
+# Demo shortcuts → React app
+[[redirects]]
+  from   = "/demo"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
+  from   = "/free-demo"
+  to     = "/index.html"
+  status = 200
+
+# SPA fallback — all unmatched routes serve the React app shell
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# Cache Vite's content-hashed bundles forever
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Never cache entry points or service worker
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/main.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control   = "no-cache, no-store, must-revalidate"
+    Service-Worker-Allowed = "/"
