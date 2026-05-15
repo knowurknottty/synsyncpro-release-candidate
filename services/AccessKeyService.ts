@@ -11,6 +11,7 @@
  */
 
 import { MembershipPlan, AccessToken, UserData, AccessSession, SessionRecord } from '../types.ts';
+import { sanitizeInput } from '../src/utils/SecurityUtils';
 
 // ─── Internal constants ───────────────────────────────────────────────────────
 
@@ -308,7 +309,12 @@ export const AccessKeyService = {
   },
 
   setLocalUserData(uid: string, data: UserData): void {
-    try { localStorage.setItem(`synsync_ud_${uid}`, JSON.stringify(data)); } catch { /* quota */ }
+    const safe: UserData = {
+      ...data,
+      displayName: sanitizeInput(data.displayName),
+      notes: sanitizeInput(data.notes),
+    };
+    try { localStorage.setItem(`synsync_ud_${uid}`, JSON.stringify(safe)); } catch { /* quota */ }
   },
 
   // ── Session cache (survives page reload, re-checked for expiry) ──────────────

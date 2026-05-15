@@ -25,12 +25,17 @@ export class ProtocolPlayer {
   async start(): Promise<void> {
     if (!this.protocol) throw new Error("Load protocol first");
     this.context = new AudioContext({ sampleRate: 44100 });
+    await this.context.resume();
+    if (this.context.state !== 'running') {
+      await this.context.close();
+      this.context = undefined;
+      throw new Error('AudioContext could not start — start() must be called from a user gesture handler');
+    }
     this.engines = this.protocol.layers.map(layer => {
       const engine = new GraphEngine(this.context!);
       engine.build(layer.dspGraph);
       return engine;
     });
-    await this.context.resume();
   }
 
   async stop(): Promise<void> {

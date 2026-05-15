@@ -75,7 +75,11 @@ export class GraphEngine {
   private connect(spec: DspConnectionSpec): void {
     const from = this.nodeMap.get(spec.fromNodeId);
     const to = this.nodeMap.get(spec.toNodeId);
-    if (from && to) {
+    if (!from) {
+      console.error(`[GraphEngine] Missing source node: ${spec.fromNodeId}`);
+    } else if (!to) {
+      console.error(`[GraphEngine] Missing target node: ${spec.toNodeId}`);
+    } else {
       from.connect(to);
     }
   }

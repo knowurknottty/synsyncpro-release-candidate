@@ -73,6 +73,7 @@ export class AudioEngine {
   private noiseGain: GainNode | null = null;
   
   private animationFrameId: number | null = null;
+  private pendingPhaseTimer: ReturnType<typeof setTimeout> | null = null;
   private onProgressCallback: ((progress: number) => void) | null = null;
   public onTick: ((totalElapsed: number, phaseElapsed: number, phaseIndex: number) => void) | undefined;
   public onComplete: (() => void) | undefined;
@@ -225,8 +226,8 @@ export class AudioEngine {
     const binauralStrength = phase.entrainmentMode?.binaural?.strength ?? 1.0;
     const baseVol = (phase.vol ?? 0.7) * binauralStrength;
     
-    nodes.leftGain.gain.value = phase.volL ?? baseVol;
-    nodes.rightGain.gain.value = phase.volR ?? baseVol;
+    nodes.leftGain.gain.value = Math.min(MAX_AMPLITUDE, phase.volL ?? baseVol);
+    nodes.rightGain.gain.value = Math.min(MAX_AMPLITUDE, phase.volR ?? baseVol);
 
     // UPGRADE 12: Isochronic tones (amplitude modulation)
     if (phase.entrainmentMode?.isochronic?.enabled) {
@@ -408,18 +409,25 @@ export class AudioEngine {
       );
 
       const validatedBeat = this.validateBeatFrequency(beat, 'Phase modulation');
+      const prevBeatFreq = nodes.beatFreq;
 
       nodes.beatFreq = validatedBeat;
       nodes.rightFreq = nodes.leftFreq + validatedBeat;
 
-      nodes.rightOsc.frequency.setTargetAtTime(nodes.rightFreq, now, tc);
+      // Seizure safety: limit rate of change to ≤2 Hz/s for beats in the 3-30 Hz band
+      const beatDelta = Math.abs(validatedBeat - prevBeatFreq);
+      const beatTc = (validatedBeat >= 3 && validatedBeat <= 30 && beatDelta > 0)
+        ? Math.max(tc, beatDelta / 2)
+        : tc;
+
+      nodes.rightOsc.frequency.setTargetAtTime(nodes.rightFreq, now, beatTc);
 
       // Update isochronic/monaural LFOs if present
       if (nodes.isochronicOsc) {
-        nodes.isochronicOsc.frequency.setTargetAtTime(validatedBeat, now, tc);
+        nodes.isochronicOsc.frequency.setTargetAtTime(validatedBeat, now, beatTc);
       }
       if (nodes.monauralOsc) {
-        nodes.monauralOsc.frequency.setTargetAtTime(validatedBeat, now, tc);
+        nodes.monauralOsc.frequency.setTargetAtTime(validatedBeat, now, beatTc);
       }
     }
 
@@ -702,10 +710,16 @@ export class AudioEngine {
   private schedulePhaseTransition(duration: number): void {
     if (!this.ctx || !this.activeProtocol) return;
 
+    if (this.pendingPhaseTimer !== null) {
+      clearTimeout(this.pendingPhaseTimer);
+      this.pendingPhaseTimer = null;
+    }
+
     const totalPhases = this.activeProtocol.phases.length;
     const currentIndex = this.phaseIndex;
 
-    const timer = setTimeout(async () => {
+    this.pendingPhaseTimer = setTimeout(async () => {
+      this.pendingPhaseTimer = null;
       if (!this.activeProtocol || this.isPaused || this.phaseIndex !== currentIndex) return;
       const nextIndex = currentIndex + 1;
       if (nextIndex < totalPhases) {
@@ -713,7 +727,6 @@ export class AudioEngine {
       } else {
         this.onProtocolComplete();
       }
-      clearTimeout(timer);
     }, duration * 1000);
   }
 
@@ -721,6 +734,11 @@ export class AudioEngine {
   private static readonly PHASE_FADE_MS = 30;
 
   private stopCurrentPhase(): void {
+    if (this.pendingPhaseTimer !== null) {
+      clearTimeout(this.pendingPhaseTimer);
+      this.pendingPhaseTimer = null;
+    }
+
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
@@ -976,7 +994,7 @@ export class AudioEngine {
 
     // Master gain + limiter chain
     const masterGain = offlineCtx.createGain();
-    masterGain.gain.value = 0.85;
+    masterGain.gain.value = MAX_AMPLITUDE;
     const limiter = offlineCtx.createDynamicsCompressor();
     limiter.threshold.value = LIMITER_THRESHOLD;
     limiter.knee.value = LIMITER_KNEE;
