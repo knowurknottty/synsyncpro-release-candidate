@@ -22,6 +22,7 @@ No official release should be made until:
 | Sleep | `deep_sleep_delta` | `src/protocols/specs/sleep/sleep-recovery.spec.ts` |
 | Focus | `focus_v5_professional` | `src/protocols/specs/cognitive/performance-focus.spec.ts` |
 | Anxiety | `anxiety_relief_v4` | `src/protocols/specs/sufferingReduction/suffering-reduction.spec.ts` |
+| Depression | `mood_elevator_v4` | `src/protocols/specs/sufferingReduction/suffering-reduction.spec.ts` |
 
 ## FrankenCAPT Proof Surface
 
@@ -38,18 +39,18 @@ The bridge provides a sanitized handshake, public module manifests, challenge re
 These hashes cover the current pre-release tree before final license replacement, IPFS pinning, and PGP signing.
 
 ```text
-8959b28fd480c5138eb654402b650920a3115e6930f312fad248864be7c0d736  README.md
+ba3547428170b1a2052599e318275b7561e917d8512bfcc5da038291b5c6eb40  README.md
 e482e71eeff811e2d3e2b3107e8bcd5b024e503653b56d0979371ca0c362c438  LICENSE.md
 b1a575b7645f8435a3cb55c85dddb48553576272a8806426646a9895eb2bb0e9  package.json
 9a93e3584d8170a12df83e04fb45c64156f8176ca283f6446f02b582a1e98338  package-lock.json
 0ce63258407f3ead0f2a53a9f3155a2a5581f99bccfd46d1e56fc8c0e4a6006b  App.tsx
-762c5e6cca563d0a4d3d8dc274222dd1de03fbfc705e13f498d3bb5645040ecc  services/AccessKeyService.ts
+446aaf522dbe3d7582612f182dbd850893aa897a57e962bf6958ee298bb6c63d  services/AccessKeyService.ts
 3186d4891338393dd689888dbf43d61ec422031b6c346efa920aab1ae4eafe38  services/ZipService.ts
-084aea1f4a219e05b2229a05f1028d0212f0ff6291841d379535e52a414d7c08  services/AudioEngine.ts
-6148732950e10f425ca556b438164ea0a536da0673e7126785e14e662fa4533d  src/frankencapt/FrankenCAPTBridge.ts
-8ae922d79a94d1d6aedefc9156ef899c04c026e84859a71609a4d043fa0aea6f  src/frankencapt/publicRelease.ts
+4951246b935162d3a7313bf1d777450c926cb1a46a53c6f096c2d64ee451a40c  services/AudioEngine.ts
+9c3eecbc5729f8f07d36e1d115761868532481ca6c501154aacf2a5108036ebc  src/frankencapt/FrankenCAPTBridge.ts
+5b9aa346da6a6a44e5c41df4684b4652b03fb58932201177d4c1f5decef443f9  src/frankencapt/publicRelease.ts
 649e92714cc115fa3743ac13f72db173c63b8814b905804c5334492a71671080  src/frankencapt/index.ts
-c8b4de9155e1d39c7b91b81a030589fcefbe60354c24f1252c5a3bce23a2ecd7  src/frankencapt/__tests__/FrankenCAPTBridge.test.ts
+39bd1e7bee8fba91e636804ab540533259ee7e52b26c8cfa57cc1c2c1b930ae3  src/frankencapt/__tests__/FrankenCAPTBridge.test.ts
 89c845be012ece1d7bd090186f4fff0d86c52850cce17e13e7db77ec5d9590f1  src/protocols/specs/sufferingReduction/suffering-reduction.spec.ts
 8ed07bc9591c8bd1475d5b6d011305ad4672ee6e8b09c662d62ceb0128a16c6f  src/protocols/specs/sleep/sleep-recovery.spec.ts
 0bc2dcbf1b7763f4cfe0b8049d4c2d5bf896004e92c9ac1c2b836966ab058080  src/protocols/specs/cognitive/performance-focus.spec.ts

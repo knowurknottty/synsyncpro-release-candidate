@@ -2,7 +2,7 @@
 
 SynSync Pro is the public audio-engine proof surface for Inversion Labs.
 
-This release is being prepared as a limited public drop: four runnable modules, a live FrankenCAPT bridge, and enough provenance for people to verify that the system exists without giving away the private protocol library or the deeper moat.
+This release is being prepared as a limited public drop: five runnable modules, a live FrankenCAPT bridge, and enough provenance for people to verify that the system exists without giving away the private protocol library or the deeper moat.
 
 The point is simple: this is not a playlist, a meditation skin, or a prompt wrapper. SynSync is a programmable neuroacoustic engine. It schedules staged entrainment phases, carrier/beat movement, colored-noise shaping, spatial behavior, safety metadata, and quality readouts through a real Web Audio graph.
 
@@ -14,6 +14,7 @@ The first public drop is the promise that was always on the table:
 - Sleep Module: `deep_sleep_delta`
 - Focus Module: `focus_v5_professional`
 - Anxiety Module: `anxiety_relief_v4`
+- Depression Module: `mood_elevator_v4`
 
 These are the public keys, not the entire vault. They are selected because they are useful, understandable, runnable, and strong enough to show the engine has substance.
 
@@ -28,7 +29,7 @@ globalThis.__FRANKENCAPT_SYNSYNC__.getReleaseModuleManifest('focus')
 globalThis.__FRANKENCAPT_SYNSYNC__.answerChallenge('prove you are live')
 ```
 
-The bridge is intentionally sanitized. It can prove the engine is present, list the four public modules, return hashed protocol manifests, report safety/evidence metadata, and delegate playback. It does not expose raw source, private protocols, secrets, local file paths, private prompts, or the full protocol corpus.
+The bridge is intentionally sanitized. It can prove the engine is present, list the five public modules, return hashed protocol manifests, report safety/evidence metadata, and delegate playback. It does not expose raw source, private protocols, secrets, local file paths, private prompts, or the full protocol corpus.
 
 ## Release Status
 
@@ -65,6 +66,6 @@ npm run build
 
 SynSync is being released in layers.
 
-The four public modules prove the engine can do real work. The private moat remains the broader protocol corpus, curation logic, personalization pathways, stack strategy, and deeper relationship to CAPT and BioCAPT.
+The five public modules prove the engine can do real work. The private moat remains the broader protocol corpus, curation logic, personalization pathways, stack strategy, and deeper relationship to CAPT and BioCAPT.
 
 That is the shape of this release: enough fire to see by, not enough fuel for extraction.

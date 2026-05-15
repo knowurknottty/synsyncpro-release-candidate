@@ -121,7 +121,7 @@ const CAPABILITIES = [
   'qa-metrics-readout',
   'safety-profile-readout',
   'challenge-response-proof',
-  'four-module-public-release',
+  'five-module-public-release',
 ] as const;
 
 const EMPTY_DISCLOSURE = {

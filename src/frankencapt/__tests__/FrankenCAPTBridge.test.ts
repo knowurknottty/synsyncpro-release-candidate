@@ -65,8 +65,8 @@ describe('FrankenCAPTBridge', () => {
       exposesLocalPaths: false,
       exposesSecrets: false,
     });
-    expect(handshake.release.moduleCount).toBe(4);
-    expect(handshake.capabilities).toContain('four-module-public-release');
+    expect(handshake.release.moduleCount).toBe(5);
+    expect(handshake.capabilities).toContain('five-module-public-release');
     expect(handshake.proofHash).toMatch(/^fnv1a32:/);
   });
 
@@ -82,7 +82,7 @@ describe('FrankenCAPTBridge', () => {
     expect(JSON.stringify(manifest)).not.toContain(protocol.description);
   });
 
-  it('exposes the four public release modules as runnable protocol manifests', () => {
+  it('exposes the five public release modules as runnable protocol manifests', () => {
     const bridge = new FrankenCAPTBridge(createMockEngine());
 
     expect(FRANKENCAPT_RELEASE_MODULES.map((module) => module.moduleId)).toEqual([
@@ -90,6 +90,7 @@ describe('FrankenCAPTBridge', () => {
       'sleep',
       'focus',
       'anxiety',
+      'depression',
     ]);
 
     for (const releaseModule of FRANKENCAPT_RELEASE_MODULES) {
@@ -125,4 +126,3 @@ describe('FrankenCAPTBridge', () => {
     expect(receipt.protocolHash).toMatch(/^fnv1a32:/);
   });
 });
-

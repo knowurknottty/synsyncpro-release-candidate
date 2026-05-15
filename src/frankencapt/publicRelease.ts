@@ -1,7 +1,7 @@
 import { PROTOCOLS } from '../audio/constants.ts';
 import type { Protocol } from '../../types.ts';
 
-export type FrankenCAPTReleaseModuleId = 'pain' | 'sleep' | 'focus' | 'anxiety';
+export type FrankenCAPTReleaseModuleId = 'pain' | 'sleep' | 'focus' | 'anxiety' | 'depression';
 
 export interface FrankenCAPTReleaseModule {
   moduleId: FrankenCAPTReleaseModuleId;
@@ -54,6 +54,16 @@ export const FRANKENCAPT_RELEASE_MODULES: readonly FrankenCAPTReleaseModule[] = 
       'The anxiety module is the public trust anchor: simple enough to understand, strong enough to matter, and structured to demonstrate a real therapeutic DSP path.',
     intendedUse:
       'Public, non-commercial individual use for acute or recurring anxiety support. Not emergency care and not a replacement for professional treatment.',
+  },
+  {
+    moduleId: 'depression',
+    protocolId: 'mood_elevator_v4',
+    title: 'Mood Elevator',
+    shortName: 'Depression Module',
+    releaseReason:
+      'The depression module shows the other side of the nervous-system map: a staged alpha-to-beta lift with reward-circuit targeting, mood-lift overlays, and safety metadata for stimulation-sensitive users.',
+    intendedUse:
+      'Public, non-commercial individual use for mood and motivation support. Not crisis care, not a substitute for clinical treatment, and avoid during manic or hyperactivated states.',
   },
 ] as const;
 
