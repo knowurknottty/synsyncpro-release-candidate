@@ -13,6 +13,12 @@ for (const [width, height] of viewports) {
     await page.goto('/index.html');
     await expect(page.locator('[data-synsync-shell="canonical"]')).toHaveCount(1);
     await expect(page.locator('[data-synsync-shell="legacy-mobile"]')).toHaveCount(0);
+
+    const shell = page.locator('[data-synsync-shell="canonical"]');
+    const box = await shell.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.width).toBeLessThanOrEqual(width + 1);
+    expect(box!.height).toBeGreaterThan(0);
   });
 }
 
@@ -26,5 +32,56 @@ test('resizing across the former 1024 breakpoint never changes application ident
     await page.setViewportSize({ width, height: 768 });
     await expect(canonical).toHaveCount(1);
     await expect(page.locator('[data-synsync-shell="legacy-mobile"]')).toHaveCount(0);
+  }
+});
+
+test('canonical shell survives portrait-landscape transitions without horizontal overflow', async ({ page }) => {
+  await page.goto('/index.html');
+
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 844, height: 390 },
+    { width: 820, height: 1180 },
+    { width: 1180, height: 820 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expect(page.locator('[data-synsync-shell="canonical"]')).toHaveCount(1);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(1);
+  }
+});
+
+test('visualizer backing store follows its rendered size after repeated viewport changes', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/index.html');
+
+  const canvas = page.locator('canvas').first();
+  if (await canvas.count() === 0) test.skip(true, 'Visualizer canvas is only present after selecting a protocol');
+
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 1024, height: 768 },
+    { width: 390, height: 844 },
+    { width: 820, height: 1180 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.waitForTimeout(100);
+    const metrics = await canvas.evaluate((el: HTMLCanvasElement) => {
+      const rect = el.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      return {
+        cssWidth: rect.width,
+        cssHeight: rect.height,
+        backingWidth: el.width,
+        backingHeight: el.height,
+        dpr,
+      };
+    });
+
+    expect(metrics.backingWidth).toBeGreaterThan(0);
+    expect(metrics.backingHeight).toBeGreaterThan(0);
+    expect(Math.abs(metrics.backingWidth / metrics.cssWidth - metrics.dpr)).toBeLessThan(0.15);
+    expect(Math.abs(metrics.backingHeight / metrics.cssHeight - metrics.dpr)).toBeLessThan(0.15);
   }
 });
