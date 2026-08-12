@@ -12,7 +12,9 @@
     "test:coverage": "vitest --coverage",
     "type-check": "tsc --noEmit",
     "lint": "tsc --noEmit && echo 'Type checking passed!'",
-    "validate:protocols": "tsx scripts/check-protocols.ts"
+    "validate:protocols": "tsx scripts/check-protocols.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test -u"
   },
   "dependencies": {
     "@fontsource/fira-code": "^5.0.0",
@@ -35,6 +37,7 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@testing-library/jest-dom": "^6.1.5",
     "@testing-library/react": "^16.1.0",
     "@testing-library/user-event": "^14.5.1",
