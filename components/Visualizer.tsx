@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext.tsx';
 import { AudioEngine } from '../services/AudioEngine';
 import { CymaticMedium, XRSession } from '../types';
@@ -339,10 +339,66 @@ export const Visualizer: React.FC<VisualizerProps> = ({
     const animationRef = useRef<number | null>(null);
     const frameRef = useRef<number>(0);
     const geoRotRef = useRef<{x: number, y: number}>({x: 0, y: 0});
-    
+
+    // VIS-001: live backing-store bookkeeping so the canvas tracks its rendered
+    // container on resize, orientation change, and fullscreen transitions without
+    // recreating the WebGL context or restarting DSP.
+    const sizeRef = useRef({ width: 0, height: 0, dpr: 1 });
+    const glRef = useRef<WebGL2RenderingContext | null>(null);
+    const rendererKindRef = useRef<'2d' | 'webgl' | 'cym' | null>(null);
+    const dprPolicyRef = useRef<(d: number) => number>((d) => d);
+    // VIS-002: deterministic render fallback. Recorded per requested mode so a
+    // different mode re-enters its normal renderer path on switch.
+    const [renderOverride, setRenderOverride] = useState<{ mode: string; target: string } | null>(null);
+
+    const applySize = React.useCallback(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return;
+        const rawDpr = window.devicePixelRatio || 1;
+        const effDpr = dprPolicyRef.current(rawDpr);
+        const bw = Math.max(1, Math.round(rect.width * effDpr));
+        const bh = Math.max(1, Math.round(rect.height * effDpr));
+        sizeRef.current = { width: rect.width, height: rect.height, dpr: effDpr };
+        const kind = rendererKindRef.current;
+        if (kind === 'webgl' || kind === 'cym') {
+            if (canvas.width !== bw || canvas.height !== bh) { canvas.width = bw; canvas.height = bh; }
+            const gl = glRef.current;
+            if (gl) gl.viewport(0, 0, bw, bh);
+        } else if (kind === '2d') {
+            if (canvas.width !== bw || canvas.height !== bh) { canvas.width = bw; canvas.height = bh; }
+            const ctx = canvas.getContext('2d');
+            if (ctx) ctx.setTransform(effDpr, 0, 0, effDpr, 0, 0);
+        }
+    }, []);
+
+    const fallbackTo = React.useCallback((target: string) => {
+        setRenderOverride((prev) => {
+            const next = { mode, target };
+            if (prev && prev.mode === mode && prev.target === target) return prev;
+            return next;
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [mode]);
+
     const isWebGLMode = ['neural', 'cosmic', 'hyper', 'symmetry', 'galactic', 'cyber', 'dmt'].includes(mode) && hdEnabled;
     const isCymatics = mode === 'cymatics';
-    const canvasKey = isCymatics ? 'cym' : isWebGLMode ? 'webgl' : '2d';
+    const overrideTarget = renderOverride && renderOverride.mode === mode ? renderOverride.target : null;
+    const canvasKey = overrideTarget ? `2dfb-${overrideTarget}` : isCymatics ? 'cym' : isWebGLMode ? 'webgl' : '2d';
+
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        let raf = 0;
+        const ro = new ResizeObserver(() => {
+            cancelAnimationFrame(raf);
+            raf = requestAnimationFrame(applySize);
+        });
+        ro.observe(canvas);
+        return () => { ro.disconnect(); cancelAnimationFrame(raf); };
+    }, [canvasKey, renderOverride, applySize]);
+
 
     useEffect(() => {
         if (!canvasRef.current) return;
@@ -360,13 +416,14 @@ export const Visualizer: React.FC<VisualizerProps> = ({
              return;
         }
 
-        if (xrSession) initXR(mode);
+        if (overrideTarget) initCanvas2D(overrideTarget);
+        else if (xrSession) initXR(mode);
         else if (isCymatics) initCymatics();
         else if (isWebGLMode) initWebGL(mode);
         else initCanvas2D(mode);
 
         return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
-    }, [mode, complexity, background, hdEnabled, cymaticMedium, isPlaying, xrSession]);
+    }, [mode, complexity, background, hdEnabled, cymaticMedium, isPlaying, xrSession, renderOverride, overrideTarget]);
 
     const initXR = async (currentMode: string) => {
          if (!audioEngine.analyser || !xrSession) return;
@@ -380,18 +437,23 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         const canvas = canvasRef.current!;
         const gl = canvas.getContext('webgl2');
         if (!gl) {
-            console.error('[Cymatics] WebGL2 not supported');
+            console.error('[Cymatics] WebGL2 not supported - falling back to deterministic 2D mode');
+            fallbackTo('pulse');
             return;
         }
 
         // Check for required extensions
         const ext = gl.getExtension("EXT_color_buffer_float");
         if (!ext) {
-            console.error('[Cymatics] EXT_color_buffer_float not supported - falling back to basic rendering');
-            // Fallback to 2D canvas rendering
-            initCanvas2D('pulse');
+            console.error('[Cymatics] EXT_color_buffer_float not supported - falling back to 2D rendering');
+            fallbackTo('pulse');
             return;
         }
+
+        rendererKindRef.current = 'cym';
+        glRef.current = gl;
+        dprPolicyRef.current = (d: number) => Math.min(d, 2);
+        applySize();
 
         const createProgram = (fsSrc: string) => {
             const vs = gl.createShader(gl.VERTEX_SHADER)!;
@@ -425,15 +487,10 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         const renderProg = createProgram(FS_CYMATICS_RENDER);
 
         if (!simProg || !renderProg) {
-            console.error('[Cymatics] Failed to create shader programs');
+            console.error('[Cymatics] Failed to create shader programs - falling back to 2D rendering');
+            fallbackTo('pulse');
             return;
         }
-        
-        // Set canvas size
-        const dpr = Math.min(window.devicePixelRatio || 1, 2);
-        canvas.width = canvas.clientWidth * dpr;
-        canvas.height = canvas.clientHeight * dpr;
-        gl.viewport(0, 0, canvas.width, canvas.height);
 
         const textures: WebGLTexture[] = [];
         const fbos: WebGLFramebuffer[] = [];
@@ -513,13 +570,14 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         const gl = canvas.getContext('webgl2');
         if (!gl) {
             console.error(`[WebGL ${currentMode}] WebGL2 not supported - falling back to oscilloscope`);
-            initCanvas2D('oscilloscope');
+            fallbackTo('oscilloscope');
             return;
         }
 
-        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-        canvas.width = canvas.clientWidth * dpr; canvas.height = canvas.clientHeight * dpr;
-        gl.viewport(0, 0, canvas.width, canvas.height);
+        rendererKindRef.current = 'webgl';
+        glRef.current = gl;
+        dprPolicyRef.current = (d: number) => Math.min(d, 1.5);
+        applySize();
 
         let fsSrc = FS_NEURAL;
         if (currentMode === 'cosmic') fsSrc = FS_COSMIC;
@@ -535,7 +593,7 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         gl.compileShader(vs);
         if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
             console.error(`[WebGL ${currentMode}] Vertex shader compile error:`, gl.getShaderInfoLog(vs));
-            initCanvas2D('oscilloscope');
+            fallbackTo('oscilloscope');
             return;
         }
 
@@ -545,7 +603,7 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         gl.compileShader(fs);
         if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
             console.error(`[WebGL ${currentMode}] Fragment shader compile error:`, gl.getShaderInfoLog(fs));
-            initCanvas2D('oscilloscope');
+            fallbackTo('oscilloscope');
             return;
         }
 
@@ -556,7 +614,7 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         gl.linkProgram(prog);
         if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
             console.error(`[WebGL ${currentMode}] Program link error:`, gl.getProgramInfoLog(prog));
-            initCanvas2D('oscilloscope');
+            fallbackTo('oscilloscope');
             return;
         }
         gl.useProgram(prog);
@@ -591,12 +649,12 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         const canvas = canvasRef.current!;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
-        
-        const dpr = window.devicePixelRatio || 1;
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
-        
+
+        rendererKindRef.current = '2d';
+        glRef.current = null;
+        dprPolicyRef.current = (d: number) => d;
+        applySize();
+
         const bufferLength = audioEngine.analyser.frequencyBinCount;
         const dataArray = new Uint8Array(bufferLength);
         
@@ -649,7 +707,10 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         const render = () => {
             if (!audioEngine.analyser) return;
             audioEngine.analyser.getByteFrequencyData(dataArray);
-            
+
+            // Live render size (backing store / DPR kept in sync by ResizeObserver).
+            const rect = sizeRef.current;
+
             // Clean clear for transparency if needed
             ctx.clearRect(0,0, rect.width, rect.height);
             
