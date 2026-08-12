@@ -27,3 +27,8 @@ dist-ssr
 *.sln
 *.sw?
 dist-deploy.zip
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/

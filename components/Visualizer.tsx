@@ -399,6 +399,26 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         return () => { ro.disconnect(); cancelAnimationFrame(raf); };
     }, [canvasKey, renderOverride, applySize]);
 
+    // Set the active renderer kind + DPR policy even before playback begins so the
+    // backing store stays in sync with the rendered container while idle (a protocol
+    // is selected but audio is not yet playing). This mirrors what the corresponding
+    // init*() function would set once rendering actually starts.
+    useEffect(() => {
+        if (overrideTarget) {
+            rendererKindRef.current = '2d';
+            dprPolicyRef.current = (d: number) => d;
+        } else if (isCymatics) {
+            rendererKindRef.current = 'cym';
+            dprPolicyRef.current = (d: number) => Math.min(d, 2);
+        } else if (isWebGLMode) {
+            rendererKindRef.current = 'webgl';
+            dprPolicyRef.current = (d: number) => Math.min(d, 1.5);
+        } else {
+            rendererKindRef.current = '2d';
+            dprPolicyRef.current = (d: number) => d;
+        }
+    }, [canvasKey, overrideTarget, isCymatics, isWebGLMode]);
+
 
     useEffect(() => {
         if (!canvasRef.current) return;

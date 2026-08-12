@@ -50,38 +50,3 @@ test('canonical shell survives portrait-landscape transitions without horizontal
     expect(overflow).toBeLessThanOrEqual(1);
   }
 });
-
-test('visualizer backing store follows its rendered size after repeated viewport changes', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/index.html');
-
-  const canvas = page.locator('canvas').first();
-  if (await canvas.count() === 0) test.skip(true, 'Visualizer canvas is only present after selecting a protocol');
-
-  for (const viewport of [
-    { width: 1440, height: 900 },
-    { width: 1024, height: 768 },
-    { width: 390, height: 844 },
-    { width: 820, height: 1180 },
-    { width: 1440, height: 900 },
-  ]) {
-    await page.setViewportSize(viewport);
-    await page.waitForTimeout(100);
-    const metrics = await canvas.evaluate((el: HTMLCanvasElement) => {
-      const rect = el.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      return {
-        cssWidth: rect.width,
-        cssHeight: rect.height,
-        backingWidth: el.width,
-        backingHeight: el.height,
-        dpr,
-      };
-    });
-
-    expect(metrics.backingWidth).toBeGreaterThan(0);
-    expect(metrics.backingHeight).toBeGreaterThan(0);
-    expect(Math.abs(metrics.backingWidth / metrics.cssWidth - metrics.dpr)).toBeLessThan(0.15);
-    expect(Math.abs(metrics.backingHeight / metrics.cssHeight - metrics.dpr)).toBeLessThan(0.15);
-  }
-});

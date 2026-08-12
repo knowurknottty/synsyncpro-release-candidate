@@ -260,7 +260,7 @@ const App: React.FC = () => {
   }
 
   return (
-    <div data-synsync-shell="canonical" className="contents">
+    <div data-synsync-shell="canonical" className="relative flex min-h-dvh w-full flex-col overflow-x-hidden">
       {showWelcome && <FirstRunModal onDismiss={handleDismissWelcome} />}
       {showOnboarding && (
         <OnboardingModal
