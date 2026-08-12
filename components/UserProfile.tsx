@@ -36,7 +36,6 @@ import {
 } from 'lucide-react';
 import { AccessSession, UserData, SessionRecord, Protocol } from '../types';
 import { AccessKeyService } from '../services/AccessKeyService.ts';
-import { PROTOCOLS } from '../constants.ts';
 
 interface Prescription {
   id: string;
@@ -53,6 +52,7 @@ interface UserProfileProps {
   accessSession: AccessSession;
   onUpdateSession: (session: AccessSession) => void;
   onRequestNewFile: () => void;
+  protocols?: Protocol[];
 }
 
 type Tab = 'overview' | 'history' | 'prescriptions' | 'notes' | 'file';
@@ -77,6 +77,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   accessSession,
   onUpdateSession,
   onRequestNewFile,
+  protocols = [],
 }) => {
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [isEditingNotes, setIsEditingNotes] = useState(false);
@@ -89,6 +90,10 @@ export const UserProfile: React.FC<UserProfileProps> = ({
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   const { userData, token } = accessSession;
+  const protocolsById = useMemo(
+    () => Object.fromEntries(protocols.map((protocol) => [protocol.id, protocol])),
+    [protocols],
+  );
 
   // Calculate stats
   const stats: ProfileStats = useMemo((): ProfileStats => {
@@ -105,7 +110,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
     });
     const mostUsedProtocolId = Object.entries(protocolCounts)
       .sort((a, b) => b[1] - a[1])[0]?.[0];
-    const mostUsedProtocol = mostUsedProtocolId ? PROTOCOLS[mostUsedProtocolId] : undefined;
+    const mostUsedProtocol = mostUsedProtocolId ? protocolsById[mostUsedProtocolId] : undefined;
 
     // Streak calculation (simplified - consecutive days with sessions)
     const uniqueDays = new Set(history.map(h => 
@@ -126,7 +131,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
       lastWeekSessions: lastWeek.length,
       lastWeekMinutes: Math.round(lastWeek.reduce((sum, h) => sum + (h.durationMs || 0), 0) / 60000),
     };
-  }, [userData]);
+  }, [protocolsById, userData]);
 
   // Get prescriptions from userData
   const prescriptions = getPrescriptions(userData);
@@ -407,7 +412,7 @@ export const UserProfile: React.FC<UserProfileProps> = ({
               ) : (
                 <div className="space-y-2">
                   {[...(userData.history || [])].reverse().map((session, idx) => {
-                    const protocol = PROTOCOLS[session.protocolId];
+                    const protocol = protocolsById[session.protocolId];
                     return (
                       <div
                         key={idx}

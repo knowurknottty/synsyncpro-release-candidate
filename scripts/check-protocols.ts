@@ -2,7 +2,7 @@
 // Protocol validation runner for CI/CD and local development
 
 import { validateProtocols, ProtocolIssue } from '../services/validateProtocols';
-import { PROTOCOLS } from '../constants';
+import { PROTOCOLS } from '../src/audio/constants';
 
 function formatIssue(issue: ProtocolIssue): string {
   const scope = issue.phaseId

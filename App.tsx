@@ -15,7 +15,6 @@ import { OnboardingModal, PrivacySettings } from './components/OnboardingModal.t
 import { DataExportPanel } from './components/DataExportPanel.tsx';
 import { UserProfile } from './components/UserProfile.tsx';
 import { AccessKeyService } from './services/AccessKeyService.ts';
-import { installFrankenCAPTBridge } from './src/frankencapt/index.ts';
 
 /**
  * Main App Component
@@ -38,6 +37,8 @@ const App: React.FC = () => {
   const { modals, open, close } = useModalState();
 
   const [activeProtocol, setActiveProtocol] = useState<Protocol | null>(null);
+  const [protocols, setProtocols] = useState<Protocol[]>([]);
+  const [libraryStatus, setLibraryStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   const [appMode, setAppMode] = useState<'scientific' | 'speculative'>('scientific');
   const [safetyCleared, setSafetyCleared] = useState(false);
   const [uiMode, setUiMode] = useState<'guided' | 'expert'>(
@@ -105,6 +106,26 @@ const App: React.FC = () => {
   const [showAccessGate, setShowAccessGate] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+
+    import('./services/ProtocolVault.ts')
+      .then(({ ProtocolVault }) => {
+        if (cancelled) return;
+        setProtocols(ProtocolVault.getAllProtocols());
+        setLibraryStatus('ready');
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error('Protocol library failed to load:', error);
+        setLibraryStatus('error');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem('synsync_ui_mode', uiMode);
   }, [uiMode]);
 
@@ -136,7 +157,21 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (!audioEngine) return undefined;
-    return installFrankenCAPTBridge(audioEngine);
+    let cancelled = false;
+    let uninstall: (() => void) | undefined;
+
+    import('./src/frankencapt/FrankenCAPTBridge.ts')
+      .then(({ installFrankenCAPTBridge }) => {
+        if (!cancelled) uninstall = installFrankenCAPTBridge(audioEngine);
+      })
+      .catch((error) => {
+        if (!cancelled) console.error('FrankenCAPT bridge failed to load:', error);
+      });
+
+    return () => {
+      cancelled = true;
+      uninstall?.();
+    };
   }, [audioEngine]);
 
   useEffect(() => {
@@ -277,6 +312,7 @@ const App: React.FC = () => {
         isOpen={modals.userProfile || false}
         onClose={() => close('userProfile')}
         accessSession={accessSession}
+        protocols={protocols}
         onUpdateSession={setAccessSession}
         onRequestNewFile={() => {
           setAccessSession(null);
@@ -303,6 +339,8 @@ const App: React.FC = () => {
       />
       <DesktopApp
         {...commonProps}
+        protocols={protocols}
+        libraryStatus={libraryStatus}
         accessSession={accessSession}
         onUpdateSession={setAccessSession}
       />

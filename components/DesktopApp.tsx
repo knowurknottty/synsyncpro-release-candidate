@@ -22,7 +22,6 @@ import {
   User,
 } from 'lucide-react';
 import { Protocol, AudioState, SessionGuidance, MantraProfile, AccessSession } from '../types.ts';
-import { Visualizer } from './Visualizer.tsx';
 import { ProtocolList } from './ProtocolList.tsx';
 import { SessionProgress } from './SessionProgress.tsx';
 import { SourcesModal } from './SourcesModal.tsx';
@@ -35,9 +34,11 @@ import { PhaseTimeline } from './PhaseTimeline.tsx';
 import { GuidanceOverlay } from './GuidanceOverlay.tsx';
 import { WavExporter } from './WavExporter.tsx';
 import { Logo } from './Logo.tsx';
-import { UserProfile } from './UserProfile.tsx';
 import { AudioEngine } from '../services/AudioEngine.ts';
-import { ProtocolVault } from '../services/ProtocolVault.ts';
+
+const Visualizer = React.lazy(() =>
+  import('./Visualizer.tsx').then((module) => ({ default: module.Visualizer }))
+);
 
 interface DesktopAppProps {
   audioEngine: AudioEngine;
@@ -47,6 +48,8 @@ interface DesktopAppProps {
   uiMode: 'guided' | 'expert';
   isPlayingCurrent: boolean;
   modals: Record<string, boolean>;
+  protocols: Protocol[];
+  libraryStatus: 'loading' | 'ready' | 'error';
   accessSession?: AccessSession;
   onSelectProtocol: (protocol: Protocol) => void;
   onSetAppMode: (mode: 'scientific' | 'speculative') => void;
@@ -67,6 +70,8 @@ const DesktopAppComponent: React.FC<DesktopAppProps> = ({
   uiMode,
   isPlayingCurrent,
   modals,
+  protocols,
+  libraryStatus,
   accessSession,
   onSelectProtocol,
   onSetAppMode,
@@ -82,7 +87,6 @@ const DesktopAppComponent: React.FC<DesktopAppProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const vizContainerRef = useRef<HTMLDivElement>(null);
   const [activeGuidances, setActiveGuidances] = useState<Set<SessionGuidance>>(new Set());
-  const [profileOpen, setProfileOpen] = useState(false);
 
   const toggleGuidance = useCallback((id: SessionGuidance) => {
     setActiveGuidances(prev => {
@@ -177,16 +181,7 @@ const DesktopAppComponent: React.FC<DesktopAppProps> = ({
     >
       <div className="absolute inset-0 pointer-events-none scanlines z-[100] opacity-20" aria-hidden="true" />
 
-      {accessSession && onUpdateSession && (
-        <UserProfile
-          isOpen={profileOpen}
-          accessSession={accessSession}
-          onClose={() => setProfileOpen(false)}
-          onUpdateSession={onUpdateSession}
-          onRequestNewFile={() => onOpenModal('accessGate')}
-        />
-      )}
-      <SourcesModal isOpen={modals.sources} onClose={() => onCloseModal('sources')} />
+      <SourcesModal isOpen={modals.sources} onClose={() => onCloseModal('sources')} protocols={protocols} />
       <LegalModal isOpen={modals.legal} onClose={() => onCloseModal('legal')} />
       <DownloadPortal isOpen={modals.download} onClose={() => onCloseModal('download')} />
       <SafetyGateModal
@@ -249,16 +244,24 @@ const DesktopAppComponent: React.FC<DesktopAppProps> = ({
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 custom-scrollbar">
-          {uiMode === 'guided' ? (
+          {libraryStatus === 'loading' ? (
+            <div className="flex h-full min-h-40 items-center justify-center px-4 text-center text-xs font-mono uppercase tracking-widest text-gray-500" role="status">
+              Loading public library…
+            </div>
+          ) : libraryStatus === 'error' ? (
+            <div className="flex h-full min-h-40 items-center justify-center px-4 text-center text-xs text-red-300" role="alert">
+              The protocol library could not be loaded. Refresh to try again.
+            </div>
+          ) : uiMode === 'guided' ? (
             <GuidedHome
-              protocols={ProtocolVault.getAllProtocols()}
+              protocols={protocols}
               selectedId={activeProtocol?.id || null}
               onSelect={onSelectProtocol}
               prescription={accessSession?.userData.prescription}
             />
           ) : (
             <ProtocolList
-              protocols={ProtocolVault.getAllProtocols()}
+              protocols={protocols}
               selectedId={activeProtocol?.id || null}
               onSelect={onSelectProtocol}
               mode={appMode}
@@ -304,7 +307,7 @@ const DesktopAppComponent: React.FC<DesktopAppProps> = ({
               />
             </div>
             <button
-              onClick={() => setProfileOpen(true)}
+              onClick={() => onOpenModal('userProfile')}
               className="flex items-center gap-2 px-2 sm:pl-3 sm:pr-4 py-1.5 rounded-full border border-neuro-700/50 bg-neuro-800/40 hover:border-neuro-500/60 hover:bg-neuro-700/50 transition-all group shrink-0"
               aria-label="Open user profile"
             >
@@ -323,14 +326,18 @@ const DesktopAppComponent: React.FC<DesktopAppProps> = ({
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 lg:gap-6 xl:gap-8 min-w-0">
               <section className="xl:col-span-7 flex flex-col gap-4 lg:gap-6 xl:pr-4 pb-10 min-w-0">
                 <div ref={vizContainerRef} className="bg-black border-2 border-neuro-700/50 rounded-xl lg:rounded-2xl overflow-hidden relative aspect-video shadow-2xl shrink-0 min-w-0">
-                  <Visualizer
-                    audioEngine={audioEngine}
-                    isPlaying={audioState.isPlaying}
-                    mode={vizMode as any}
-                    complexity={0.5}
-                    background="#000"
-                    hdEnabled={WEBGL_MODES.has(vizMode)}
-                  />
+                  <React.Suspense
+                    fallback={<div className="absolute inset-0 grid place-items-center bg-black text-xs font-mono uppercase tracking-widest text-gray-600">Loading visualizer…</div>}
+                  >
+                    <Visualizer
+                      audioEngine={audioEngine}
+                      isPlaying={audioState.isPlaying}
+                      mode={vizMode as any}
+                      complexity={0.5}
+                      background="#000"
+                      hdEnabled={WEBGL_MODES.has(vizMode)}
+                    />
+                  </React.Suspense>
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
                   <button
                     onClick={() => {

@@ -2,7 +2,7 @@
 // RVP-Enhanced Protocol Safety Validation Module for SynSync
 // Updated: February 2, 2026
 
-import { PROTOCOLS } from '../constants';
+import { PROTOCOLS } from '../src/audio/constants';
 import { Protocol, Phase } from '../types';
 
 export interface ProtocolIssue {

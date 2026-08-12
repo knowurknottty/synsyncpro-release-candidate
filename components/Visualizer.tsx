@@ -337,6 +337,9 @@ export const Visualizer: React.FC<VisualizerProps> = ({
     }, [theme]);
 
     const animationRef = useRef<number | null>(null);
+    const renderFrameRef = useRef<((time: number) => void) | null>(null);
+    const renderingAllowedRef = useRef(true);
+    const rendererCleanupRef = useRef<(() => void) | null>(null);
     const frameRef = useRef<number>(0);
     const geoRotRef = useRef<{x: number, y: number}>({x: 0, y: 0});
 
@@ -350,6 +353,21 @@ export const Visualizer: React.FC<VisualizerProps> = ({
     // VIS-002: deterministic render fallback. Recorded per requested mode so a
     // different mode re-enters its normal renderer path on switch.
     const [renderOverride, setRenderOverride] = useState<{ mode: string; target: string } | null>(null);
+
+    const scheduleFrame = React.useCallback(() => {
+        if (
+            animationRef.current !== null ||
+            !renderingAllowedRef.current ||
+            !renderFrameRef.current
+        ) {
+            return;
+        }
+
+        animationRef.current = requestAnimationFrame((time) => {
+            animationRef.current = null;
+            renderFrameRef.current?.(time);
+        });
+    }, []);
 
     const applySize = React.useCallback(() => {
         const canvas = canvasRef.current;
@@ -399,6 +417,38 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         return () => { ro.disconnect(); cancelAnimationFrame(raf); };
     }, [canvasKey, renderOverride, applySize]);
 
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        let inViewport = true;
+        const updateRenderingState = () => {
+            renderingAllowedRef.current = inViewport && document.visibilityState !== 'hidden';
+            if (renderingAllowedRef.current) {
+                scheduleFrame();
+            } else if (animationRef.current !== null) {
+                cancelAnimationFrame(animationRef.current);
+                animationRef.current = null;
+            }
+        };
+
+        const observer = typeof IntersectionObserver === 'undefined'
+            ? null
+            : new IntersectionObserver(([entry]) => {
+                inViewport = entry?.isIntersecting ?? true;
+                updateRenderingState();
+            }, { rootMargin: '100px' });
+
+        observer?.observe(canvas);
+        document.addEventListener('visibilitychange', updateRenderingState);
+        updateRenderingState();
+
+        return () => {
+            observer?.disconnect();
+            document.removeEventListener('visibilitychange', updateRenderingState);
+        };
+    }, [canvasKey, scheduleFrame]);
+
     // Set the active renderer kind + DPR policy even before playback begins so the
     // backing store stays in sync with the rendered container while idle (a protocol
     // is selected but audio is not yet playing). This mirrors what the corresponding
@@ -422,7 +472,11 @@ export const Visualizer: React.FC<VisualizerProps> = ({
 
     useEffect(() => {
         if (!canvasRef.current) return;
-        if (animationRef.current) cancelAnimationFrame(animationRef.current);
+        if (animationRef.current !== null) cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
+        renderFrameRef.current = null;
+        rendererCleanupRef.current?.();
+        rendererCleanupRef.current = null;
 
         if (!isPlaying || !audioEngine.analyser) {
              const ctx = canvasRef.current.getContext('2d');
@@ -442,8 +496,14 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         else if (isWebGLMode) initWebGL(mode);
         else initCanvas2D(mode);
 
-        return () => { if (animationRef.current) cancelAnimationFrame(animationRef.current); };
-    }, [mode, complexity, background, hdEnabled, cymaticMedium, isPlaying, xrSession, renderOverride, overrideTarget]);
+        return () => {
+            if (animationRef.current !== null) cancelAnimationFrame(animationRef.current);
+            animationRef.current = null;
+            renderFrameRef.current = null;
+            rendererCleanupRef.current?.();
+            rendererCleanupRef.current = null;
+        };
+    }, [mode, complexity, background, hdEnabled, cymaticMedium, isPlaying, xrSession, renderOverride, overrideTarget, scheduleFrame]);
 
     const initXR = async (currentMode: string) => {
          if (!audioEngine.analyser || !xrSession) return;
@@ -540,45 +600,74 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         const audioTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, audioTex);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         const data = new Uint8Array(audioEngine.analyser!.frequencyBinCount);
-        
-        const render = () => {
+        gl.activeTexture(gl.TEXTURE2);
+        gl.bindTexture(gl.TEXTURE_2D, audioTex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, data.length, 1, 0, gl.RED, gl.UNSIGNED_BYTE, null);
+
+        const simUniforms = {
+            prev: gl.getUniformLocation(simProg, 'u_prev'),
+            audio: gl.getUniformLocation(simProg, 'u_audio'),
+            res: gl.getUniformLocation(simProg, 'u_res'),
+            sources: gl.getUniformLocation(simProg, 'u_sources'),
+            damping: gl.getUniformLocation(simProg, 'u_damping'),
+            speed: gl.getUniformLocation(simProg, 'u_speed'),
+            complexity: gl.getUniformLocation(simProg, 'u_complexity'),
+        };
+        const renderUniforms = {
+            sim: gl.getUniformLocation(renderProg, 'u_sim'),
+            medium: gl.getUniformLocation(renderProg, 'u_medium'),
+            res: gl.getUniformLocation(renderProg, 'u_res'),
+        };
+        const sourcePositions = new Float32Array([0.5, 0.5, 0.3, 0.3, 0.7, 0.3, 0.5, 0.7]);
+        const mediumIndex = ['sand','water','mercury','oil','ferrofluid','plasma','gold','aether'].indexOf(cymaticMedium || 'water');
+        const renderPosLoc = gl.getAttribLocation(renderProg, 'position');
+
+        const render = (_time: number) => {
             if (!audioEngine.analyser) return;
             audioEngine.analyser.getByteFrequencyData(data);
             gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, audioTex);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, data.length, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, data);
+            gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, data.length, 1, gl.RED, gl.UNSIGNED_BYTE, data);
             
             gl.useProgram(simProg);
             gl.bindFramebuffer(gl.FRAMEBUFFER, fbos[frameRef.current % 2]);
             gl.viewport(0,0,512,512);
             gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, textures[(frameRef.current+1)%2]);
-            gl.uniform1i(gl.getUniformLocation(simProg, 'u_prev'), 0);
-            gl.uniform1i(gl.getUniformLocation(simProg, 'u_audio'), 2);
-            gl.uniform2f(gl.getUniformLocation(simProg, 'u_res'), 512, 512);
-            gl.uniform2fv(gl.getUniformLocation(simProg, 'u_sources'), [0.5, 0.5, 0.3, 0.3, 0.7, 0.3, 0.5, 0.7]);
+            gl.uniform1i(simUniforms.prev, 0);
+            gl.uniform1i(simUniforms.audio, 2);
+            gl.uniform2f(simUniforms.res, 512, 512);
+            gl.uniform2fv(simUniforms.sources, sourcePositions);
             let damp = 0.98, speed = 0.1;
             if (cymaticMedium === 'mercury') { damp = 0.995; speed = 0.05; }
             else if (cymaticMedium === 'sand') { damp = 0.90; speed = 0.2; }
-            gl.uniform1f(gl.getUniformLocation(simProg, 'u_damping'), damp);
-            gl.uniform1f(gl.getUniformLocation(simProg, 'u_speed'), speed);
-            gl.uniform1f(gl.getUniformLocation(simProg, 'u_complexity'), complexity || 0.5);
+            gl.uniform1f(simUniforms.damping, damp);
+            gl.uniform1f(simUniforms.speed, speed);
+            gl.uniform1f(simUniforms.complexity, complexity || 0.5);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
             
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
             gl.useProgram(renderProg);
             gl.viewport(0,0,canvas.width, canvas.height);
             gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, textures[frameRef.current % 2]);
-            gl.uniform1i(gl.getUniformLocation(renderProg, 'u_sim'), 0);
-            gl.uniform1i(gl.getUniformLocation(renderProg, 'u_medium'), ['sand','water','mercury','oil','ferrofluid','plasma','gold','aether'].indexOf(cymaticMedium||'water'));
-            gl.uniform2f(gl.getUniformLocation(renderProg, 'u_res'), canvas.width, canvas.height);
+            gl.uniform1i(renderUniforms.sim, 0);
+            gl.uniform1i(renderUniforms.medium, mediumIndex);
+            gl.uniform2f(renderUniforms.res, canvas.width, canvas.height);
             
-            const loc2 = gl.getAttribLocation(renderProg, 'position');
-            gl.enableVertexAttribArray(loc2); gl.vertexAttribPointer(loc2, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(renderPosLoc); gl.vertexAttribPointer(renderPosLoc, 2, gl.FLOAT, false, 0, 0);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
             
             frameRef.current++;
-            animationRef.current = requestAnimationFrame(render);
+            scheduleFrame();
         };
-        render();
+        rendererCleanupRef.current = () => {
+            textures.forEach((texture) => gl.deleteTexture(texture));
+            fbos.forEach((framebuffer) => gl.deleteFramebuffer(framebuffer));
+            if (audioTex) gl.deleteTexture(audioTex);
+            if (buf) gl.deleteBuffer(buf);
+            gl.deleteProgram(simProg);
+            gl.deleteProgram(renderProg);
+        };
+        renderFrameRef.current = render;
+        scheduleFrame();
     };
 
     const initWebGL = (currentMode: string) => {
@@ -647,21 +736,35 @@ export const Visualizer: React.FC<VisualizerProps> = ({
         const audioTex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, audioTex);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
         const data = new Uint8Array(audioEngine.analyser!.frequencyBinCount);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, data.length, 1, 0, gl.RED, gl.UNSIGNED_BYTE, null);
+        const uniforms = {
+            audio: gl.getUniformLocation(prog, 'u_audio'),
+            res: gl.getUniformLocation(prog, 'u_res'),
+            time: gl.getUniformLocation(prog, 'u_time'),
+            complexity: gl.getUniformLocation(prog, 'u_complexity'),
+            eye: gl.getUniformLocation(prog, 'u_eye'),
+        };
+        gl.uniform1i(uniforms.audio, 0);
+        gl.uniform1f(uniforms.complexity, complexity || 0.5);
+        gl.uniform1f(uniforms.eye, 0.5);
         
         const render = (time: number) => {
             if (!audioEngine.analyser) return;
             audioEngine.analyser.getByteFrequencyData(data);
             gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, audioTex);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, data.length, 1, 0, gl.LUMINANCE, gl.UNSIGNED_BYTE, data);
-            gl.uniform1i(gl.getUniformLocation(prog, 'u_audio'), 0);
-            gl.uniform2f(gl.getUniformLocation(prog, 'u_res'), canvas.width, canvas.height);
-            gl.uniform1f(gl.getUniformLocation(prog, 'u_time'), time * 0.001);
-            gl.uniform1f(gl.getUniformLocation(prog, 'u_complexity'), complexity || 0.5);
-            gl.uniform1f(gl.getUniformLocation(prog, 'u_eye'), 0.5);
+            gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, data.length, 1, gl.RED, gl.UNSIGNED_BYTE, data);
+            gl.uniform2f(uniforms.res, canvas.width, canvas.height);
+            gl.uniform1f(uniforms.time, time * 0.001);
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-            animationRef.current = requestAnimationFrame(render);
+            scheduleFrame();
         };
-        animationRef.current = requestAnimationFrame(render);
+        rendererCleanupRef.current = () => {
+            if (audioTex) gl.deleteTexture(audioTex);
+            if (buf) gl.deleteBuffer(buf);
+            gl.deleteProgram(prog);
+        };
+        renderFrameRef.current = render;
+        scheduleFrame();
     };
 
     const initCanvas2D = (currentMode: string) => {
@@ -742,13 +845,20 @@ export const Visualizer: React.FC<VisualizerProps> = ({
             ctx.lineWidth = 2; ctx.strokeStyle = primaryColor;
 
             if (currentMode === 'spectrum') {
-                const barW = rect.width / bufferLength * 2.5;
-                let x = 0;
-                for (let i = 0; i < bufferLength; i++) {
-                    const h = (dataArray[i] / 255) * rect.height;
-                    ctx.fillStyle = `hsla(${35 + i / 5}, 100%, 50%, 0.8)`; // Amber to Yellow HSL
+                const displayBars = Math.max(1, Math.min(bufferLength, Math.floor(rect.width / 3)));
+                const binStep = bufferLength / displayBars;
+                const barW = rect.width / displayBars;
+                for (let bar = 0; bar < displayBars; bar++) {
+                    const start = Math.floor(bar * binStep);
+                    const end = Math.max(start + 1, Math.floor((bar + 1) * binStep));
+                    let peak = 0;
+                    for (let bin = start; bin < end && bin < bufferLength; bin++) {
+                        peak = Math.max(peak, dataArray[bin]);
+                    }
+                    const h = (peak / 255) * rect.height;
+                    ctx.fillStyle = 'hsla(' + (35 + bar / 5) + ', 100%, 50%, 0.8)';
+                    const x = bar * barW;
                     ctx.fillRect(x, rect.height - h, barW, h);
-                    x += barW + 1;
                 }
             } 
             else if (currentMode === 'waveform') {
@@ -960,9 +1070,10 @@ export const Visualizer: React.FC<VisualizerProps> = ({
                  ctx.stroke();
             }
             
-            animationRef.current = requestAnimationFrame(render);
+            scheduleFrame();
         };
-        render();
+        renderFrameRef.current = render;
+        scheduleFrame();
     };
 
     return <canvas key={canvasKey} ref={canvasRef} className="w-full h-full" />;

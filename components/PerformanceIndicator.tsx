@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Activity, Cpu, Eye } from 'lucide-react';
+import { X, Activity, ChevronDown, ChevronUp, Cpu, Eye } from 'lucide-react';
 import { useMotion } from '../contexts/MotionContext';
 
 /**
@@ -151,9 +151,7 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({ metr
                     className="w-6 h-6 flex items-center justify-center hover:bg-white/10 rounded transition-colors"
                     aria-label="Expand performance metrics"
                 >
-                    <span className="material-symbols-outlined text-white/60" style={{ fontSize: 16 }}>
-                        expand_more
-                    </span>
+                    <ChevronDown className="h-4 w-4 text-white/60" aria-hidden="true" />
                 </button>
             </div>
         );
@@ -178,9 +176,7 @@ export const PerformanceIndicator: React.FC<PerformanceIndicatorProps> = ({ metr
                         className="w-6 h-6 flex items-center justify-center hover:bg-white/10 rounded transition-colors"
                         aria-label="Minimize"
                     >
-                        <span className="material-symbols-outlined text-white/60" style={{ fontSize: 16 }}>
-                            expand_less
-                        </span>
+                        <ChevronUp className="h-4 w-4 text-white/60" aria-hidden="true" />
                     </button>
                     {onClose && (
                         <button

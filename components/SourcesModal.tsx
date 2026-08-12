@@ -3,10 +3,12 @@ import React, { useState } from 'react';
 import { X, Shield, BookOpen, Brain, FileText, Globe, ChevronDown, ChevronUp, Link, Lock, Microscope, Radio, Lightbulb, ExternalLink, Cpu, Zap, Monitor, Eye, Activity, Heart, Pill, LayoutGrid, Layers } from 'lucide-react';
 import ComparisonChart from './ComparisonChart';
 import { StackAnalyzer } from './StackAnalyzer';
+import { Protocol } from '../types';
 
 interface SourcesModalProps {
     isOpen: boolean;
     onClose: () => void;
+    protocols: Protocol[];
 }
 
 interface DeepDiveSection {
@@ -419,7 +421,7 @@ const RESEARCH_DB: Record<string, ResearchItem[]> = {
     ]
 };
 
-export const SourcesModal: React.FC<SourcesModalProps> = ({ isOpen, onClose }) => {
+export const SourcesModal: React.FC<SourcesModalProps> = ({ isOpen, onClose, protocols }) => {
     const [expandedCat, setExpandedCat] = useState<string | null>('defense');
     const [expandedItem, setExpandedItem] = useState<string | null>(null);
 
@@ -483,7 +485,7 @@ export const SourcesModal: React.FC<SourcesModalProps> = ({ isOpen, onClose }) =
                                 <ComparisonChart />
                             </div>
                         ) : expandedCat === 'stack_audit' ? (
-                            <StackAnalyzer />
+                            <StackAnalyzer protocols={protocols} />
                         ) : (
                         <div className="space-y-6">
                             {expandedCat && RESEARCH_DB[expandedCat]?.map((item, i) => (

@@ -41,12 +41,6 @@ vi.mock('../ManualTuningPanel.tsx', () => ({
   ManualTuningPanel: () => <div data-testid="manual-tuning">Tuning</div>,
 }));
 
-vi.mock('../../services/ProtocolVault.ts', () => ({
-  ProtocolVault: {
-    getAllProtocols: () => [],
-  },
-}));
-
 const mockProtocol: Protocol = {
   id: 'test-protocol',
   title: 'Test Protocol',
@@ -88,6 +82,8 @@ const defaultProps = {
   uiMode: 'expert' as const,
   isPlayingCurrent: false,
   modals: {},
+  protocols: [],
+  libraryStatus: 'ready' as const,
   onSelectProtocol: vi.fn(),
   onSetAppMode: vi.fn(),
   onSetUiMode: vi.fn(),
@@ -104,9 +100,10 @@ describe('DesktopApp', () => {
   });
 
   describe('rendering', () => {
-    it('should render without errors', () => {
+    it('should render without errors', async () => {
       render(<DesktopApp {...defaultProps} />);
       expect(screen.getAllByText(/SYN/).length).toBeGreaterThan(0);
+      expect(await screen.findByTestId('visualizer')).toBeInTheDocument();
     });
 
     it('should render sidebar', () => {
@@ -189,9 +186,9 @@ describe('DesktopApp', () => {
       expect(screen.getByText(mockProtocol.usageGoal)).toBeInTheDocument();
     });
 
-    it('should display visualizer', () => {
+    it('should display visualizer', async () => {
       render(<DesktopApp {...defaultProps} />);
-      expect(screen.getByTestId('visualizer')).toBeInTheDocument();
+      expect(await screen.findByTestId('visualizer')).toBeInTheDocument();
     });
 
     it('should display session progress', () => {

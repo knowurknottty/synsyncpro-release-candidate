@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { PROTOCOLS } from '../src/audio/constants';
 import { HarmonicAudit, HarmonicResult } from '../services/HarmonicAudit';
 import { AlertTriangle, CheckCircle, Info, Zap } from 'lucide-react';
+import { Protocol } from '../types';
 
-export const StackAnalyzer: React.FC = () => {
+export const StackAnalyzer: React.FC<{ protocols: Protocol[] }> = ({ protocols }) => {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [result, setResult] = useState<HarmonicResult | null>(null);
 
@@ -17,7 +17,7 @@ export const StackAnalyzer: React.FC = () => {
 
         if (newSelection.length >= 2) {
             const nodes = newSelection.map(sid => {
-                const p = PROTOCOLS[sid];
+                const p = protocols.find((protocol) => protocol.id === sid)!;
                 return { carrier: p.phases[0].carrier, beat: p.phases[0].beat, name: p.title };
             });
             setResult(HarmonicAudit.analyzeFrequencies(nodes));
@@ -38,7 +38,7 @@ export const StackAnalyzer: React.FC = () => {
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                    {Object.values(PROTOCOLS).map(p => (
+                    {protocols.map(p => (
                         <button
                             key={p.id}
                             onClick={() => toggleProtocol(p.id)}

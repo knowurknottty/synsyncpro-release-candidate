@@ -80,3 +80,52 @@ test('visualizer survives fullscreen enter/exit without corrupting the canvas (V
   expect(after.w).toBeGreaterThan(0);
   expect(Math.abs(after.w / after.cssW - DPR)).toBeLessThan(0.15);
 });
+
+test('WebGL visualizer starts or cleanly falls back without a render error', async ({ page }) => {
+  const consoleErrors: string[] = [];
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+
+  await page.goto('/index.html');
+  await page.evaluate(() => {
+    localStorage.setItem('synsync_seen_welcome', '1');
+    localStorage.setItem('synsync_ui_mode', 'expert');
+  });
+  await page.reload();
+
+  await page.getByRole('button', { name: /Select protocol:/ }).first().click();
+  await page.getByRole('button', { name: 'Neural' }).click();
+  await page.getByRole('button', { name: 'Play protocol' }).click();
+
+  await page.getByRole('button', { name: 'No seizure history' }).click();
+  await page.getByRole('button', { name: 'Next' }).click();
+  const stepTwoChecks = page.locator('input[type="checkbox"]');
+  await stepTwoChecks.nth(0).check();
+  await stepTwoChecks.nth(1).check();
+  await page.getByRole('button', { name: 'Next' }).click();
+  const stepThreeChecks = page.locator('input[type="checkbox"]');
+  await stepThreeChecks.nth(0).check();
+  await stepThreeChecks.nth(1).check();
+  await page.getByRole('button', { name: 'Begin Session' }).click();
+
+  const canvas = page.locator('div.aspect-video canvas').first();
+  await expect(canvas).toBeVisible();
+  await page.waitForTimeout(250);
+  const renderState = await canvas.evaluate((element: HTMLCanvasElement) => {
+    const gl = element.getContext('webgl2');
+    const canvas2d = gl ? null : element.getContext('2d');
+    return {
+      renderer: gl ? 'webgl2' : canvas2d ? 'canvas2d-fallback' : 'none',
+      error: gl?.getError() ?? 0,
+      width: element.width,
+      height: element.height,
+    };
+  });
+
+  expect(['webgl2', 'canvas2d-fallback']).toContain(renderState.renderer);
+  expect(renderState.error).toBe(0);
+  expect(renderState.width).toBeGreaterThan(0);
+  expect(renderState.height).toBeGreaterThan(0);
+  expect(consoleErrors.filter((message) => /shader compile|texture.*error|invalid operation/i.test(message))).toEqual([]);
+});

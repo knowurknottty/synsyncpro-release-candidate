@@ -23,7 +23,7 @@ test('clean install: canonical shell is controlled by the service worker and sur
   await context.setOffline(false);
 });
 
-test('upgrade: the v12 service worker purges all stale cache epochs (v11 legacy shell cannot persist)', async ({ page }) => {
+test('upgrade: the v13 service worker purges all stale cache epochs', async ({ page }) => {
   await page.goto('/index.html');
   await page.evaluate(() => localStorage.setItem('synsync_seen_welcome', '1'));
   await page.reload();
@@ -33,7 +33,7 @@ test('upgrade: the v12 service worker purges all stale cache epochs (v11 legacy 
   // every other cache (that is the mechanism that removes the old app shell).
   const sw = await page.evaluate(() => fetch('/sw.js').then((r) => r.text()));
   const declaredCacheName = sw.match(/CACHE_NAME\s*=\s*'([^']+)'/)?.[1];
-  expect(declaredCacheName).toBe('synsync-v12-canonical-ui');
+  expect(declaredCacheName).toBe('synsync-v13-release-alignment');
   expect(sw).toMatch(/cacheName !== CACHE_NAME/);
   expect(sw).toMatch(/caches\.delete\(cacheName\)/);
 
@@ -62,6 +62,6 @@ test('upgrade: the v12 service worker purges all stale cache epochs (v11 legacy 
   }, declaredCacheName);
 
   const after = await page.evaluate(async () => (await caches.keys()).filter((k) => k.startsWith('synsync-')));
-  expect(after).toEqual(['synsync-v12-canonical-ui']);
+  expect(after).toEqual(['synsync-v13-release-alignment']);
   await expect(page.locator('[data-synsync-shell="legacy-mobile"]')).toHaveCount(0);
 });

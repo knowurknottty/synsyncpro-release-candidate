@@ -1,5 +1,27 @@
 import React, { useState } from 'react';
-import { Pause, Play, ChevronLeft } from 'lucide-react';
+import {
+  Activity,
+  AudioWaveform,
+  BarChart3,
+  Blend,
+  ChevronLeft,
+  Circle,
+  CircleDot,
+  Droplets,
+  Flame,
+  Grid3X3,
+  Hexagon,
+  Magnet,
+  Network,
+  Orbit,
+  Pause,
+  Play,
+  Sparkles,
+  Star,
+  Timer,
+  Waves,
+  Wind,
+} from 'lucide-react';
 import { Protocol, AudioState } from '../types.ts';
 import { AudioEngine } from '../services/AudioEngine.ts';
 import { Visualizer } from './Visualizer.tsx';
@@ -30,7 +52,7 @@ type CymaticMedium = 'water' | 'sand' | 'mercury' | 'oil' | 'ferrofluid' | 'plas
 interface VizModeOption {
   id: VizMode;
   label: string;
-  icon: string;
+  Icon: React.ElementType;
   expertOnly?: boolean;
 }
 
@@ -39,35 +61,35 @@ interface VizModeOption {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const VIZ_MODES: VizModeOption[] = [
-  { id: 'cymatics',       label: 'Cymatics',  icon: 'waves'                 },
-  { id: 'oscilloscope',   label: 'Scope',     icon: 'show_chart'            },
-  { id: 'spectrum',       label: 'Spectrum',  icon: 'bar_chart'             },
-  { id: 'waveform',       label: 'Wave',      icon: 'ssid_chart'            },
-  { id: 'pulse',          label: 'Pulse',     icon: 'radio_button_checked'  },
-  { id: 'fractal',        label: 'Fractal',   icon: 'filter_vintage'        },
-  { id: 'sacred_geometry',label: 'Sacred',    icon: 'hexagon'               },
-  { id: 'neural',         label: 'Neural',    icon: 'hub',       expertOnly: true },
-  { id: 'cosmic',         label: 'Cosmic',    icon: 'galaxy',    expertOnly: true },
-  { id: 'hyper',          label: 'Hyper',     icon: 'motion_blur',expertOnly: true},
-  { id: 'symmetry',       label: 'Symmetry',  icon: 'blur_on',   expertOnly: true },
-  { id: 'galactic',       label: 'Galactic',  icon: 'brightness_5', expertOnly: true },
-  { id: 'cyber',          label: 'Cyber',     icon: 'grid_on',   expertOnly: true },
-  { id: 'dmt',            label: 'DMT',       icon: 'auto_awesome', expertOnly: true },
+  { id: 'cymatics',       label: 'Cymatics',  Icon: Waves },
+  { id: 'oscilloscope',   label: 'Scope',     Icon: Activity },
+  { id: 'spectrum',       label: 'Spectrum',  Icon: BarChart3 },
+  { id: 'waveform',       label: 'Wave',      Icon: AudioWaveform },
+  { id: 'pulse',          label: 'Pulse',     Icon: CircleDot },
+  { id: 'fractal',        label: 'Fractal',   Icon: Network },
+  { id: 'sacred_geometry',label: 'Sacred',    Icon: Hexagon },
+  { id: 'neural',         label: 'Neural',    Icon: Network, expertOnly: true },
+  { id: 'cosmic',         label: 'Cosmic',    Icon: Orbit, expertOnly: true },
+  { id: 'hyper',          label: 'Hyper',     Icon: Wind, expertOnly: true},
+  { id: 'symmetry',       label: 'Symmetry',  Icon: Blend, expertOnly: true },
+  { id: 'galactic',       label: 'Galactic',  Icon: Star, expertOnly: true },
+  { id: 'cyber',          label: 'Cyber',     Icon: Grid3X3, expertOnly: true },
+  { id: 'dmt',            label: 'DMT',       Icon: Sparkles, expertOnly: true },
 ];
 
 const CYMATIC_MEDIA: CymaticMedium[] = [
   'water', 'sand', 'mercury', 'oil', 'ferrofluid', 'plasma', 'gold', 'aether',
 ];
 
-const MEDIUM_ICONS: Record<CymaticMedium, string> = {
-  water:      'water_drop',
-  sand:       'grain',
-  mercury:    'blur_circular',
-  oil:        'opacity',
-  ferrofluid: 'magnet',
-  plasma:     'flare',
-  gold:       'star',
-  aether:     'air',
+const MEDIUM_ICONS: Record<CymaticMedium, React.ElementType> = {
+  water: Droplets,
+  sand: Circle,
+  mercury: Circle,
+  oil: Droplets,
+  ferrofluid: Magnet,
+  plasma: Flame,
+  gold: Star,
+  aether: Wind,
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -96,6 +118,7 @@ export const VisualizerView: React.FC<VisualizerViewProps> = ({
   const [vizMode,       setVizMode]       = useState<VizMode>('cymatics');
   const [medium,        setMedium]        = useState<CymaticMedium>('water');
   const [showProgress,  setShowProgress]  = useState(false);
+  const MediumIcon = MEDIUM_ICONS[medium];
 
   const availableModes = uiMode === 'expert'
     ? VIZ_MODES
@@ -162,12 +185,7 @@ export const VisualizerView: React.FC<VisualizerViewProps> = ({
             }}
             aria-label={`Cymatic medium: ${medium}. Tap to cycle.`}
           >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 14, fontVariationSettings: "'FILL' 0, 'wght' 200" }}
-            >
-              {MEDIUM_ICONS[medium]}
-            </span>
+            <MediumIcon className="h-3.5 w-3.5" aria-hidden="true" />
             {medium}
           </button>
         )}
@@ -183,12 +201,7 @@ export const VisualizerView: React.FC<VisualizerViewProps> = ({
             }}
             aria-label="Toggle session progress"
           >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 18, fontVariationSettings: "'FILL' 0" }}
-            >
-              timer
-            </span>
+            <Timer className="h-[18px] w-[18px]" aria-hidden="true" />
           </button>
         )}
       </div>
@@ -243,12 +256,7 @@ export const VisualizerView: React.FC<VisualizerViewProps> = ({
                 }
                 aria-label={`Switch to ${m.label} visualization`}
               >
-                <span
-                  className="material-symbols-outlined"
-                  style={{ fontSize: 14, fontVariationSettings: "'FILL' 0, 'wght' 300" }}
-                >
-                  {m.icon}
-                </span>
+                <m.Icon className="h-3.5 w-3.5" aria-hidden="true" />
                 {m.label}
               </button>
             ))}

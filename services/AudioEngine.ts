@@ -21,8 +21,6 @@ import {
   LIMITER_THRESHOLD,
   LIMITER_KNEE
 } from '../types';
-import { ProtocolVault } from './ProtocolVault';
-
 // FIX imports — v2.0 DSP improvements
 import { generateNoiseBuffers, startNoiseFromBuffers, type NoiseBuffers } from '../src/audio/dsp/noise-generator';
 import { calculateAdaptiveCrossfade, crossfadeGains } from '../src/audio/dsp/adaptive-crossfade';

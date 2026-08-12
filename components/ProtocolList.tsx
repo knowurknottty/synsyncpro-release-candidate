@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useDeferredValue, useState, useMemo, useEffect, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext.tsx';
 import { Protocol } from '../types.ts';
 import { Brain, ChevronDown, ChevronRight, Folder, Layers, Zap, Shield, Activity, Target, Battery, Moon, Heart, Globe, FlaskConical, Microscope, Wind, Sparkles, Speaker, Cpu, Search, Clock, X, Headphones } from 'lucide-react';
@@ -68,6 +68,7 @@ export const ProtocolList: React.FC<ProtocolListProps> = ({ protocols, selectedI
         'Calibration': true, 'Isochronic (Speakers)': true, 'Sleep & Recovery': true, 'Performance Focus': true
     });
     const [search, setSearch] = useState('');
+    const deferredSearch = useDeferredValue(search);
 
     // Track dismissed NEW badges
     const [dismissedNew, setDismissedNew] = useState<Set<string>>(() => {
@@ -91,7 +92,7 @@ export const ProtocolList: React.FC<ProtocolListProps> = ({ protocols, selectedI
     const protocolRefs = useRef<(HTMLDivElement | null)[]>([]);
 
     const groupedProtocols = useMemo(() => {
-        const q = search.trim().toLowerCase();
+        const q = deferredSearch.trim().toLowerCase();
         const groups: Record<string, Protocol[]> = {};
         protocols.forEach(p => {
             if (mode === 'scientific' && (p.category === 'speculative' || p.evidenceLevel === 'V')) return;
@@ -107,7 +108,7 @@ export const ProtocolList: React.FC<ProtocolListProps> = ({ protocols, selectedI
             groups[s].push(p);
         });
         return groups;
-    }, [protocols, mode, search]);
+    }, [protocols, mode, deferredSearch]);
 
     const sortedSections = Object.keys(SECTIONS_CONFIG).filter(s => groupedProtocols[s]);
     // When searching, all sections with results are expanded
@@ -228,6 +229,7 @@ export const ProtocolList: React.FC<ProtocolListProps> = ({ protocols, selectedI
                                         }}
                                         tabIndex={0}
                                         role="button"
+                                        style={{ contentVisibility: 'auto', containIntrinsicSize: '0 132px' }}
                                         aria-label={`Select protocol: ${p.title}`}
                                         className={`p-4 rounded-lg border-l-2 cursor-pointer transition-all outline-none ${
                                             selectedId === p.id ? 'bg-neuro-500/10 border-neuro-500' : 'bg-transparent border-transparent hover:bg-white/5 ml-4'

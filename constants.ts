@@ -1,6 +1,4 @@
-import { PROTOCOLS, PROTOCOL_CHAINS } from './src/audio/constants';
 import { SocraticStep } from './types';
-export { PROTOCOLS, PROTOCOL_CHAINS };
 
 export const SOLFEGGIO = {
     UT: 396,   // Liberating guilt/fear

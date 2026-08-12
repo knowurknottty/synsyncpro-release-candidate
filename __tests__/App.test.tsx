@@ -58,6 +58,16 @@ vi.mock('../components/DesktopApp.tsx', () => ({
   DesktopApp: () => <div data-testid="desktop-app">Canonical App</div>,
 }));
 
+vi.mock('../services/ProtocolVault.ts', () => ({
+  ProtocolVault: {
+    getAllProtocols: () => [],
+  },
+}));
+
+vi.mock('../src/frankencapt/FrankenCAPTBridge.ts', () => ({
+  installFrankenCAPTBridge: vi.fn(() => vi.fn()),
+}));
+
 const mockAudioEngine = {
   playProtocol: vi.fn(),
   stop: vi.fn(),
