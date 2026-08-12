@@ -59,3 +59,18 @@ test('public copy and app shell avoid third-party runtime dependencies', async (
   await expect(page.locator('body')).not.toContainText(/expand_more|expand_less|show_chart|bar_chart/);
   expect([...externalOrigins]).toEqual([]);
 });
+
+test('Netlify routing keeps the landing page distinct from the audio lab', async ({ request }) => {
+  const redirects = await request.get('/_redirects');
+  if (redirects.ok()) {
+    expect(await redirects.text()).toMatch(/^\/[ \t]+\/main\.html[ \t]+200!/m);
+  }
+
+  const landing = await request.get('/main.html');
+  const app = await request.get('/index.html');
+  const landingHtml = await landing.text();
+  const appHtml = await app.text();
+  expect(landingHtml).toContain('Pay what—and if—you can');
+  expect(appHtml).toContain('<div id="root"></div>');
+  expect(landingHtml).not.toEqual(appHtml);
+});
