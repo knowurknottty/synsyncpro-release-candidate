@@ -59,9 +59,6 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
-    <!-- QR Code library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
-
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
     {
@@ -238,29 +235,3 @@
 </head>
 <body>
     <!-- Google Tag Manager (noscript) -->
-    <noscript>
-        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-WFFG6HG9"
-                height="0"
-                width="0"
-                style="display:none;visibility:hidden"></iframe>
-    </noscript>
-    <!-- End Google Tag Manager (noscript) -->
-
-    <div id="root"></div>
-
-    <!-- Vite/TS entry -->
-    <script type="module" src="/index.tsx"></script>
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(reg => {
-                    console.log('SynSync Service Worker registered');
-                }).catch(err => {
-                    console.log('SW registration failed: ', err);
-                });
-            });
-        }
-    </script>
-</body>
-</html>
