@@ -51,3 +51,7 @@ jobs:
       - run: npm run type-check
       - run: npm test -- --run
       - run: npm run build
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Run browser regression suite
+        run: npm run test:e2e
