@@ -233,12 +233,14 @@ const DesktopAppComponent: React.FC<DesktopAppProps> = ({
               <button
                 onClick={() => onSetAppMode('scientific')}
                 className={`flex-1 py-1.5 text-[10px] font-bold font-mono rounded ${appMode === 'scientific' ? 'bg-neuro-700/80 text-white' : 'text-gray-600'}`}
+                aria-label="Research-backed protocols only"
               >
                 Research-Backed
               </button>
               <button
                 onClick={() => onSetAppMode('speculative')}
                 className={`flex-1 py-1.5 text-[10px] font-bold font-mono rounded ${appMode === 'speculative' ? 'bg-neuro-accent/20 text-neuro-accent' : 'text-gray-600'}`}
+                aria-label="All protocols including exploratory"
               >
                 Exploratory
               </button>
@@ -266,14 +268,14 @@ const DesktopAppComponent: React.FC<DesktopAppProps> = ({
 
         <div className="p-3 sm:p-4 border-t border-neuro-700/50 flex flex-col gap-2 shrink-0">
           <div className="flex gap-2">
-            <button onClick={() => onOpenModal('sources')} className="flex-1 py-2 bg-neuro-700/30 hover:bg-neuro-700/50 rounded text-[9px] font-bold uppercase tracking-widest text-gray-400 border border-neuro-700 flex items-center justify-center gap-2">
+            <button onClick={() => onOpenModal('sources')} aria-label="Open library" className="flex-1 py-2 bg-neuro-700/30 hover:bg-neuro-700/50 rounded text-[9px] font-bold uppercase tracking-widest text-gray-400 border border-neuro-700 flex items-center justify-center gap-2">
               <BookOpen className="w-3 h-3" /> Library
             </button>
-            <button onClick={() => onOpenModal('legal')} className="flex-1 py-2 bg-neuro-700/30 hover:bg-neuro-700/50 rounded text-[9px] font-bold uppercase tracking-widest text-gray-400 border border-neuro-700 flex items-center justify-center gap-2">
+            <button onClick={() => onOpenModal('legal')} aria-label="Open legal" className="flex-1 py-2 bg-neuro-700/30 hover:bg-neuro-700/50 rounded text-[9px] font-bold uppercase tracking-widest text-gray-400 border border-neuro-700 flex items-center justify-center gap-2">
               <ShieldAlert className="w-3 h-3" /> Legal
             </button>
           </div>
-          <button onClick={() => onOpenModal('settings')} className="w-full py-2 bg-neuro-700/30 hover:bg-neuro-700/50 rounded text-[9px] font-bold uppercase tracking-widest text-gray-400 border border-neuro-700 flex items-center justify-center gap-2">
+          <button onClick={() => onOpenModal('settings')} aria-label="Open settings" className="w-full py-2 bg-neuro-700/30 hover:bg-neuro-700/50 rounded text-[9px] font-bold uppercase tracking-widest text-gray-400 border border-neuro-700 flex items-center justify-center gap-2">
             <Settings className="w-3 h-3" /> Settings
           </button>
         </div>
@@ -431,7 +433,7 @@ const DesktopAppComponent: React.FC<DesktopAppProps> = ({
                       <p className="text-xs text-gray-300 leading-relaxed">{activeProtocol.usageGoal}</p>
                     </div>
                   )}
-                  <button onClick={() => onOpenModal('download')} className="w-full py-3 bg-neuro-800 hover:bg-neuro-700 border border-neuro-600 text-gray-300 hover:text-white font-bold rounded-lg transition-colors text-sm">Get Portable App</button>
+                  <button onClick={() => onOpenModal('download')} aria-label="Download portable app" className="w-full py-3 bg-neuro-800 hover:bg-neuro-700 border border-neuro-600 text-gray-300 hover:text-white font-bold rounded-lg transition-colors text-sm">Get Portable App</button>
                 </div>
 
                 <WavExporter protocol={activeProtocol} audioEngine={audioEngine} />

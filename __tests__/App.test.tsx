@@ -4,7 +4,6 @@ import React from 'react';
 import App from '../App.tsx';
 import { useAudioEngine } from '../src/context/AudioEngineContext.tsx';
 import { useAudioPlayback } from '../src/hooks/useAudioPlayback.ts';
-import { useResponsiveness } from '../src/hooks/useResponsiveness.ts';
 import { useModalState } from '../src/hooks/useModalState.ts';
 
 vi.mock('../src/context/AudioEngineContext.tsx', () => ({
@@ -13,10 +12,6 @@ vi.mock('../src/context/AudioEngineContext.tsx', () => ({
 
 vi.mock('../src/hooks/useAudioPlayback.ts', () => ({
   useAudioPlayback: vi.fn(),
-}));
-
-vi.mock('../src/hooks/useResponsiveness.ts', () => ({
-  useResponsiveness: vi.fn(),
 }));
 
 vi.mock('../src/hooks/useModalState.ts', () => ({
@@ -89,12 +84,6 @@ const mockAudioPlayback = {
   setVolume: vi.fn(),
 };
 
-const mockResponsiveness = {
-  isMobile: false,
-  width: 1920,
-  orientation: 'landscape' as const,
-};
-
 const mockModalState = {
   modals: {
     sources: false,
@@ -113,7 +102,6 @@ describe('App Component', () => {
     vi.clearAllMocks();
     (useAudioEngine as any).mockReturnValue(mockAudioEngine);
     (useAudioPlayback as any).mockReturnValue(mockAudioPlayback);
-    (useResponsiveness as any).mockReturnValue(mockResponsiveness);
     (useModalState as any).mockReturnValue(mockModalState);
   });
 
@@ -122,45 +110,26 @@ describe('App Component', () => {
       render(<App />);
       expect(useAudioEngine).toHaveBeenCalled();
       expect(useAudioPlayback).toHaveBeenCalledWith(mockAudioEngine);
-      expect(useResponsiveness).toHaveBeenCalled();
       expect(useModalState).toHaveBeenCalled();
     });
   });
 
   describe('canonical responsive routing', () => {
-    it('renders the canonical app for a wide viewport classification', () => {
+    it('renders the canonical app for any viewport classification', () => {
       render(<App />);
       expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
     });
 
-    it('renders the same canonical app for a narrow/mobile classification', () => {
-      (useResponsiveness as any).mockReturnValue({
-        isMobile: true,
-        width: 375,
-        orientation: 'portrait' as const,
-      });
-
-      render(<App />);
-      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
-    });
-
-    it('does not replace the application tree when responsiveness changes', () => {
+    it('renders the same canonical app across re-renders', () => {
       const { rerender } = render(<App />);
       expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
-
-      (useResponsiveness as any).mockReturnValue({
-        isMobile: true,
-        width: 390,
-        orientation: 'portrait' as const,
-      });
       rerender(<App />);
       expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
+    });
 
-      (useResponsiveness as any).mockReturnValue({
-        isMobile: false,
-        width: 1440,
-        orientation: 'landscape' as const,
-      });
+    it('does not replace the application tree as state changes', () => {
+      const { rerender } = render(<App />);
+      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
       rerender(<App />);
       expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
     });
