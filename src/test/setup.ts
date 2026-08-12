@@ -2,6 +2,32 @@ import '@testing-library/jest-dom';
 import { expect, afterEach, vi, beforeAll, beforeEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
+// jsdom (< v24) does not implement ResizeObserver. Visualizer now uses one to keep
+// the canvas backing store in sync, so provide a minimal observer stub for tests.
+if (typeof globalThis.ResizeObserver === 'undefined') {
+  class ResizeObserverStub {
+    constructor(private callback: () => void) {}
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  (globalThis as any).ResizeObserver = ResizeObserverStub;
+}
+
+// jsdom does not implement matchMedia by default.
+if (typeof window !== 'undefined' && typeof (window as any).matchMedia === 'undefined') {
+  (window as any).matchMedia = (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  });
+}
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();

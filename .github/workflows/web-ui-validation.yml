@@ -1,0 +1,57 @@
+name: Web UI Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'App.tsx'
+      - 'components/**'
+      - 'contexts/**'
+      - 'src/**'
+      - '__tests__/**'
+      - 'tests/**'
+      - 'index.html'
+      - 'manifest.json'
+      - 'sw.js'
+      - 'netlify.toml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'tailwind.config.js'
+      - '.github/workflows/web-ui-validation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'App.tsx'
+      - 'components/**'
+      - 'contexts/**'
+      - 'src/**'
+      - '__tests__/**'
+      - 'tests/**'
+      - 'index.html'
+      - 'manifest.json'
+      - 'sw.js'
+      - 'netlify.toml'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vite.config.ts'
+      - 'tailwind.config.js'
+      - '.github/workflows/web-ui-validation.yml'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm test -- --run
+      - run: npm run build
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Run browser regression suite
+        run: npm run test:e2e

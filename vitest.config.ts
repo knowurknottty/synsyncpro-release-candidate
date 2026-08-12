@@ -36,6 +36,7 @@ export default defineConfig({
       'dist/',
       '**/dist/**',
       'coverage/',
+      'tests/e2e/**',
       'src/protocols/specs/**',
       'src/audio/legacy-specs/**',
     ],

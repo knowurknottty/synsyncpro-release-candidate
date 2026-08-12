@@ -5,10 +5,8 @@ import { useMotion } from './contexts/MotionContext.tsx';
 import { useAudioEngine } from './src/context/AudioEngineContext.tsx';
 import { useAudioPlayback } from './src/hooks/useAudioPlayback.ts';
 import { useIOSAudioSession } from './src/hooks/useIOSAudioSession.ts';
-import { useResponsiveness } from './src/hooks/useResponsiveness.ts';
 import { useModalState } from './src/hooks/useModalState.ts';
 import { DesktopApp } from './components/DesktopApp.tsx';
-import { MobileApp, MobileTab } from './components/MobileApp.tsx';
 import { FirstRunModal } from './components/FirstRunModal.tsx';
 import { SettingsPanel } from './components/SettingsPanel.tsx';
 import { AccessGate } from './components/AccessGate.tsx';
@@ -22,42 +20,30 @@ import { installFrankenCAPTBridge } from './src/frankencapt/index.ts';
 /**
  * Main App Component
  *
- * Refactored to use custom hooks and extract UI into separate components.
- * Responsibilities:
- * - Manage core application state (protocol selection, app mode, etc.)
- * - Coordinate between hooks and UI components
- * - Handle safety gating logic
- * - Route between mobile and desktop layouts
+ * The public application has one canonical visual implementation. Viewport size
+ * may change layout mechanics inside DesktopApp, but must never select a second
+ * application tree.
  */
 const App: React.FC = () => {
-  // ── Access gate ───────────────────────────────────────────────────────────
-  // Show admin panel when ?admin is in the URL
   const isAdminRoute = new URLSearchParams(window.location.search).has('admin');
 
   const [accessSession, setAccessSession] = useState<AccessSession | null>(
     () => AccessKeyService.restoreCachedSession() ?? AccessKeyService.createPublicReleaseSession(),
   );
 
-  // Get audio engine from context
   const audioEngine = useAudioEngine();
   const { theme, toggleTheme } = useTheme();
   const { reduceMotion, setReduceMotion } = useMotion();
-
-  // Use custom hooks for reusable state
   const { audioState, play, pause, resume, stop, setVolume } = useAudioPlayback(audioEngine);
-  const { isMobile } = useResponsiveness();
   const { modals, open, close } = useModalState();
 
-  // Remaining state that doesn't fit into hooks
   const [activeProtocol, setActiveProtocol] = useState<Protocol | null>(null);
   const [appMode, setAppMode] = useState<'scientific' | 'speculative'>('scientific');
-  const [mobileTab, setMobileTab] = useState<MobileTab>('archive');
   const [safetyCleared, setSafetyCleared] = useState(false);
   const [uiMode, setUiMode] = useState<'guided' | 'expert'>(
     () => (localStorage.getItem('synsync_ui_mode') as 'guided' | 'expert') || 'guided'
   );
 
-  // First-run welcome screen
   const [showWelcome, setShowWelcome] = useState<boolean>(
     () => !localStorage.getItem('synsync_seen_welcome')
   );
@@ -66,9 +52,7 @@ const App: React.FC = () => {
     setShowWelcome(false);
   };
 
-  // Onboarding modal for new users (profile + privacy setup)
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
-    // Show onboarding if user hasn't completed it and has an active session
     if (!accessSession) return false;
     const prefs = accessSession.userData.preferences || {};
     return !prefs.onboardingCompleted;
@@ -76,8 +60,7 @@ const App: React.FC = () => {
 
   const handleOnboardingComplete = (profile: Partial<UserData>, privacy: PrivacySettings) => {
     if (!accessSession) return;
-    
-    // Update user data with profile and privacy settings
+
     const updatedUserData: UserData = {
       ...accessSession.userData,
       ...profile,
@@ -88,22 +71,14 @@ const App: React.FC = () => {
       },
     };
 
-    // Save to localStorage
     AccessKeyService.setLocalUserData(accessSession.token.uid, updatedUserData);
-
-    // Update session state
-    setAccessSession({
-      ...accessSession,
-      userData: updatedUserData,
-    });
-
+    setAccessSession({ ...accessSession, userData: updatedUserData });
     setShowOnboarding(false);
   };
 
   const handleOnboardingSkip = () => {
-    // Mark as completed with defaults
     handleOnboardingComplete(
-      { 
+      {
         displayName: 'Explorer',
         preferences: { onboardingCompleted: true, onboardingCompletedAt: Date.now() }
       },
@@ -118,7 +93,6 @@ const App: React.FC = () => {
     );
   };
 
-  // Settings state
   const [scanlinesEnabled, setScanlinesEnabled] = useState<boolean>(
     () => localStorage.getItem('synsync_scanlines') !== 'false'
   );
@@ -128,13 +102,12 @@ const App: React.FC = () => {
   const [headphoneWarning, setHeadphoneWarning] = useState<boolean>(
     () => localStorage.getItem('synsync_headphone_warning') !== 'false'
   );
+  const [showAccessGate, setShowAccessGate] = useState(false);
 
-  // Persist uiMode preference
   useEffect(() => {
     localStorage.setItem('synsync_ui_mode', uiMode);
   }, [uiMode]);
 
-  // Persist settings
   useEffect(() => {
     localStorage.setItem('synsync_scanlines', String(scanlinesEnabled));
   }, [scanlinesEnabled]);
@@ -147,17 +120,13 @@ const App: React.FC = () => {
     localStorage.setItem('synsync_headphone_warning', String(headphoneWarning));
   }, [headphoneWarning]);
 
-  // Check if onboarding should show when session changes
   useEffect(() => {
     if (accessSession) {
       const prefs = accessSession.userData.preferences || {};
-      if (!prefs.onboardingCompleted) {
-        setShowOnboarding(true);
-      }
+      if (!prefs.onboardingCompleted) setShowOnboarding(true);
     }
   }, [accessSession?.token.uid]);
 
-  // iOS: keep audio alive on lock screen, prevent screen sleep, unlock AudioContext early
   useIOSAudioSession({
     audioContext: audioEngine?.ctx ?? null,
     isPlaying: audioState.isPlaying && !audioState.isPaused,
@@ -170,45 +139,35 @@ const App: React.FC = () => {
     return installFrankenCAPTBridge(audioEngine);
   }, [audioEngine]);
 
-  // Reset safety cleared when protocol changes
   useEffect(() => {
     setSafetyCleared(false);
   }, [activeProtocol?.id]);
 
-  // Handle play button logic — declared BEFORE the useEffect that references it
-  // to avoid a const TDZ crash in the production bundle.
   const handlePlay = useCallback(() => {
     try {
       if (!activeProtocol) return;
-
       const isNewSelection = audioState.currentProtocolId !== activeProtocol.id;
 
-      // Safety check for new protocols
       if (!safetyCleared && (isNewSelection || !audioState.isPlaying)) {
         open('safetyGate');
         return;
       }
 
-      // Toggle play/pause for same protocol
       if (!isNewSelection && audioState.isPlaying && !audioState.isPaused) {
         pause();
       } else if (!isNewSelection && audioState.isPaused) {
         resume();
       } else {
-        // Play new protocol
         stop();
         play(activeProtocol);
-        if (isMobile) setMobileTab('session');
       }
     } catch (error) {
       console.error('Playback error:', error);
     }
-  }, [activeProtocol, audioState, safetyCleared, open, pause, resume, stop, play, isMobile, setMobileTab]);
+  }, [activeProtocol, audioState, safetyCleared, open, pause, resume, stop, play]);
 
-  // Global spacebar shortcut — play / pause active protocol
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      // Skip when user is typing in a form field
       const tag = (e.target as HTMLElement).tagName;
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
       if (e.code === 'Space') {
@@ -220,24 +179,20 @@ const App: React.FC = () => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handlePlay]);
 
-  // Check if we're currently playing the selected protocol
   const isPlayingCurrent =
     audioState.isPlaying &&
     !audioState.isPaused &&
     audioState.currentProtocolId === activeProtocol?.id;
 
-  // Handle safety gate clearance
   const handleSafetyCleared = () => {
     setSafetyCleared(true);
     close('safetyGate');
     if (activeProtocol) {
       stop();
       play(activeProtocol);
-      if (isMobile) setMobileTab('session');
     }
   };
 
-  // Media Session action handlers for lock-screen controls
   useEffect(() => {
     if (!('mediaSession' in navigator)) return;
 
@@ -247,9 +202,7 @@ const App: React.FC = () => {
     const handleMediaPlay = () => {
       if (audioState.isPaused) resume();
     };
-    const handleMediaStop = () => {
-      stop();
-    };
+    const handleMediaStop = () => stop();
 
     navigator.mediaSession.setActionHandler('pause', handleMediaPause);
     navigator.mediaSession.setActionHandler('play', handleMediaPlay);
@@ -262,16 +215,9 @@ const App: React.FC = () => {
     };
   }, [audioState.isPlaying, audioState.isPaused, pause, resume, stop]);
 
-  // Handle modal updates - convert string keys to proper modal keys
-  const handleOpenModal = (modal: string) => {
-    open(modal as any);
-  };
+  const handleOpenModal = (modal: string) => open(modal as any);
+  const handleCloseModal = (modal: string) => close(modal as any);
 
-  const handleCloseModal = (modal: string) => {
-    close(modal as any);
-  };
-
-  // Prepare common props for both mobile and desktop
   const commonProps = {
     audioEngine,
     activeProtocol,
@@ -300,69 +246,24 @@ const App: React.FC = () => {
     onHeadphoneWarningToggle: setHeadphoneWarning,
   };
 
-  // ── Routing ───────────────────────────────────────────────────────────────
-
-  // Admin panel (owner only — accessed via ?admin in URL)
   if (isAdminRoute) return <AdminPanel />;
 
-  // Access gate — shown until a valid .syns file is uploaded
-  // Or user requests a new file
-  const [showAccessGate, setShowAccessGate] = useState(false);
-  
   if (showAccessGate || !accessSession) {
     return (
-      <AccessGate 
+      <AccessGate
         onAccess={(session) => {
           setAccessSession(session);
           setShowAccessGate(false);
-        }} 
+        }}
       />
     );
   }
 
-  // Route between mobile and desktop
-  if (isMobile) {
-    return (
-      <>
-        {showWelcome && <FirstRunModal onDismiss={handleDismissWelcome} />}
-        {showOnboarding && (
-          <OnboardingModal 
-            onComplete={handleOnboardingComplete}
-            onSkip={handleOnboardingSkip}
-          />
-        )}
-        <DataExportPanel
-          isOpen={modals.dataExport || false}
-          onClose={() => close('dataExport')}
-          accessSession={accessSession}
-        />
-        <UserProfile
-          isOpen={modals.userProfile || false}
-          onClose={() => close('userProfile')}
-          accessSession={accessSession}
-          onUpdateSession={setAccessSession}
-          onRequestNewFile={() => {
-            setAccessSession(null);
-            setShowAccessGate(true);
-          }}
-        />
-        <MobileApp
-          {...commonProps}
-          mobileTab={mobileTab}
-          safetyCleared={safetyCleared}
-          onSetMobileTab={setMobileTab}
-          accessSession={accessSession}
-          onUpdateSession={setAccessSession}
-        />
-      </>
-    );
-  }
-
   return (
-    <>
+    <div data-synsync-shell="canonical" className="relative flex min-h-dvh w-full flex-col overflow-x-hidden">
       {showWelcome && <FirstRunModal onDismiss={handleDismissWelcome} />}
       {showOnboarding && (
-        <OnboardingModal 
+        <OnboardingModal
           onComplete={handleOnboardingComplete}
           onSkip={handleOnboardingSkip}
         />
@@ -405,7 +306,7 @@ const App: React.FC = () => {
         accessSession={accessSession}
         onUpdateSession={setAccessSession}
       />
-    </>
+    </div>
   );
 };
 

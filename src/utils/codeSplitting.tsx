@@ -37,11 +37,6 @@ export const createLazyComponent = <P extends object>(
  * Bundle split by platform
  */
 export const codeSplittingConfig = {
-  // Mobile components
-  mobile: {
-    MobileApp: () => import('../../components/MobileApp.tsx').then((m) => ({ default: m.MobileApp })),
-  },
-
   // Desktop components
   desktop: {
     DesktopApp: () =>

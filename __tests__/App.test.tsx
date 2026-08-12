@@ -1,23 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import App from '../App.tsx';
 import { useAudioEngine } from '../src/context/AudioEngineContext.tsx';
 import { useAudioPlayback } from '../src/hooks/useAudioPlayback.ts';
-import { useResponsiveness } from '../src/hooks/useResponsiveness.ts';
 import { useModalState } from '../src/hooks/useModalState.ts';
 
-// Mock all the custom hooks
 vi.mock('../src/context/AudioEngineContext.tsx', () => ({
   useAudioEngine: vi.fn(),
 }));
 
 vi.mock('../src/hooks/useAudioPlayback.ts', () => ({
   useAudioPlayback: vi.fn(),
-}));
-
-vi.mock('../src/hooks/useResponsiveness.ts', () => ({
-  useResponsiveness: vi.fn(),
 }));
 
 vi.mock('../src/hooks/useModalState.ts', () => ({
@@ -60,13 +54,8 @@ vi.mock('../services/AccessKeyService.ts', () => ({
   },
 }));
 
-// Mock components
-vi.mock('../components/MobileApp.tsx', () => ({
-  MobileApp: (props: any) => <div data-testid="mobile-app">Mobile App</div>,
-}));
-
 vi.mock('../components/DesktopApp.tsx', () => ({
-  DesktopApp: (props: any) => <div data-testid="desktop-app">Desktop App</div>,
+  DesktopApp: () => <div data-testid="desktop-app">Canonical App</div>,
 }));
 
 const mockAudioEngine = {
@@ -95,12 +84,6 @@ const mockAudioPlayback = {
   setVolume: vi.fn(),
 };
 
-const mockResponsiveness = {
-  isMobile: false,
-  width: 1920,
-  orientation: 'landscape' as const,
-};
-
 const mockModalState = {
   modals: {
     sources: false,
@@ -117,89 +100,48 @@ const mockModalState = {
 describe('App Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
     (useAudioEngine as any).mockReturnValue(mockAudioEngine);
     (useAudioPlayback as any).mockReturnValue(mockAudioPlayback);
-    (useResponsiveness as any).mockReturnValue(mockResponsiveness);
     (useModalState as any).mockReturnValue(mockModalState);
   });
 
   describe('hooks integration', () => {
-    it('should use useAudioEngine hook', () => {
+    it('uses the shared audio engine and playback hooks', () => {
       render(<App />);
       expect(useAudioEngine).toHaveBeenCalled();
-    });
-
-    it('should use useAudioPlayback hook', () => {
-      render(<App />);
       expect(useAudioPlayback).toHaveBeenCalledWith(mockAudioEngine);
-    });
-
-    it('should use useResponsiveness hook', () => {
-      render(<App />);
-      expect(useResponsiveness).toHaveBeenCalled();
-    });
-
-    it('should use useModalState hook', () => {
-      render(<App />);
       expect(useModalState).toHaveBeenCalled();
     });
   });
 
-  describe('responsive routing', () => {
-    it('should render DesktopApp when not mobile', () => {
-      render(<App />);
-      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
-      expect(screen.queryByTestId('mobile-app')).not.toBeInTheDocument();
-    });
-
-    it('should render MobileApp when mobile', () => {
-      (useResponsiveness as any).mockReturnValue({
-        isMobile: true,
-        width: 375,
-        orientation: 'portrait' as const,
-      });
-      render(<App />);
-      expect(screen.getByTestId('mobile-app')).toBeInTheDocument();
-      expect(screen.queryByTestId('desktop-app')).not.toBeInTheDocument();
-    });
-  });
-
-  describe('state management', () => {
-    it('should initialize with null active protocol', () => {
-      render(<App />);
-      // Check that the component renders (state is initialized)
-      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
-    });
-
-    it('should initialize with scientific app mode', () => {
+  describe('canonical responsive routing', () => {
+    it('renders the canonical app for any viewport classification', () => {
       render(<App />);
       expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
     });
 
-    it('should initialize with archive tab on mobile', () => {
-      (useResponsiveness as any).mockReturnValue({
-        isMobile: true,
-        width: 375,
-        orientation: 'portrait' as const,
-      });
-      render(<App />);
-      expect(screen.getByTestId('mobile-app')).toBeInTheDocument();
-    });
-  });
-
-  describe('safety gating', () => {
-    it('should reset safetyCleared when protocol changes', () => {
+    it('renders the same canonical app across re-renders', () => {
       const { rerender } = render(<App />);
+      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
+      rerender(<App />);
+      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
+    });
 
-      // Change protocol - this should reset safety cleared
-      // (We can't directly test state changes, but we can verify no errors occur)
+    it('does not replace the application tree as state changes', () => {
+      const { rerender } = render(<App />);
+      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
+      rerender(<App />);
       expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
     });
   });
 
-  describe('isPlayingCurrent calculation', () => {
-    it('should be true when playing current protocol', () => {
+  describe('state and playback integration', () => {
+    it('renders with the default inactive audio state', () => {
+      render(<App />);
+      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
+    });
+
+    it('renders while playback is active', () => {
       (useAudioPlayback as any).mockReturnValue({
         ...mockAudioPlayback,
         audioState: {
@@ -211,11 +153,10 @@ describe('App Component', () => {
       });
 
       render(<App />);
-      // Component should render without errors
       expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
     });
 
-    it('should be false when paused', () => {
+    it('renders while playback is paused', () => {
       (useAudioPlayback as any).mockReturnValue({
         ...mockAudioPlayback,
         audioState: {
@@ -229,54 +170,24 @@ describe('App Component', () => {
       render(<App />);
       expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
     });
-
-    it('should be false when not playing', () => {
-      (useAudioPlayback as any).mockReturnValue({
-        ...mockAudioPlayback,
-        audioState: {
-          ...mockAudioPlayback.audioState,
-          isPlaying: false,
-          isPaused: false,
-        },
-      });
-
-      render(<App />);
-      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
-    });
   });
 
-  describe('props passing', () => {
-    it('should pass audioEngine to components', () => {
+  describe('modal integration', () => {
+    it('wires modal state while preserving canonical rendering', () => {
       render(<App />);
-      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
-      // Verify audioEngine was called
-      expect(useAudioEngine).toHaveBeenCalled();
-    });
-
-    it('should pass audioState to components', () => {
-      render(<App />);
-      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
-      // Verify useAudioPlayback was called
-      expect(useAudioPlayback).toHaveBeenCalled();
-    });
-
-    it('should pass modals to components', () => {
-      render(<App />);
-      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
-      // Verify useModalState was called
       expect(useModalState).toHaveBeenCalled();
+      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
     });
   });
 
   describe('error handling', () => {
-    it('should handle missing AudioEngine gracefully', () => {
+    it('handles a missing AudioEngine without switching application identity', () => {
       (useAudioEngine as any).mockReturnValue(null);
-      expect(() => {
-        render(<App />);
-      }).not.toThrow();
+      expect(() => render(<App />)).not.toThrow();
+      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
     });
 
-    it('should render even if hooks return undefined', () => {
+    it('renders even when playback state is minimally populated', () => {
       (useAudioPlayback as any).mockReturnValue({
         audioState: {},
         play: vi.fn(),
@@ -286,83 +197,21 @@ describe('App Component', () => {
         setVolume: vi.fn(),
       });
 
-      expect(() => {
-        render(<App />);
-      }).not.toThrow();
-    });
-  });
-
-  describe('mobile specific behavior', () => {
-    it('should set mobile tab to session after playing protocol on mobile', () => {
-      (useResponsiveness as any).mockReturnValue({
-        isMobile: true,
-        width: 375,
-        orientation: 'portrait' as const,
-      });
-
-      render(<App />);
-      expect(screen.getByTestId('mobile-app')).toBeInTheDocument();
-    });
-  });
-
-  describe('modal integration', () => {
-    it('should pass modal state to components', () => {
-      render(<App />);
-      expect(useModalState).toHaveBeenCalled();
-      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
-    });
-
-    it('should handle modal open/close callbacks', () => {
-      render(<App />);
-      // Verify that modal callbacks are wired up
-      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
-    });
-  });
-
-  describe('accessibility', () => {
-    it('should render without accessibility violations', () => {
-      const { container } = render(<App />);
-      expect(container).toBeInTheDocument();
-      // Component should be properly structured
+      expect(() => render(<App />)).not.toThrow();
       expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
     });
   });
 
   describe('component lifecycle', () => {
-    it('should handle re-renders', () => {
+    it('handles re-renders without replacing the canonical app', () => {
       const { rerender } = render(<App />);
-      rerender(<App />);
-      expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
-    });
-
-    it('should handle responsive changes', () => {
-      const { rerender } = render(<App />);
-
-      // Change to mobile
-      (useResponsiveness as any).mockReturnValue({
-        isMobile: true,
-        width: 375,
-        orientation: 'portrait' as const,
-      });
-
-      rerender(<App />);
-      expect(screen.getByTestId('mobile-app')).toBeInTheDocument();
-
-      // Change back to desktop
-      (useResponsiveness as any).mockReturnValue({
-        isMobile: false,
-        width: 1920,
-        orientation: 'landscape' as const,
-      });
-
       rerender(<App />);
       expect(screen.getByTestId('desktop-app')).toBeInTheDocument();
     });
   });
 
   describe('type safety', () => {
-    it('should be properly typed', () => {
-      // This is more of a compile-time check
+    it('creates a valid App element', () => {
       const element = React.createElement(App);
       expect(element).toBeDefined();
       expect(element.type).toBe(App);

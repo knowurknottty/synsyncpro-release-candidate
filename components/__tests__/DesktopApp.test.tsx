@@ -126,10 +126,12 @@ describe('DesktopApp', () => {
   });
 
   describe('layout', () => {
-    it('should have 12-column grid layout', () => {
+    it('should use the canonical responsive grid layout', () => {
       const { container } = render(<DesktopApp {...defaultProps} />);
-      const mainDiv = container.querySelector('.grid-cols-12');
-      expect(mainDiv).toBeInTheDocument();
+      const layout = container.querySelector('[data-synsync-layout="canonical-responsive"]');
+      expect(layout).toBeInTheDocument();
+      expect(layout!.className).toContain('grid-cols-1');
+      expect(layout!.className).toContain('lg:grid-cols-12');
     });
 
     it('should render sidebar controls', () => {
@@ -263,9 +265,9 @@ describe('DesktopApp', () => {
   });
 
   describe('master volume control', () => {
-    it('should display master gain label', () => {
+    it('should display master gain control', () => {
       render(<DesktopApp {...defaultProps} />);
-      expect(screen.getByText('Volume')).toBeInTheDocument();
+      expect(screen.getByRole('slider', { name: /Master volume/i })).toBeInTheDocument();
     });
 
     it('should have volume slider', () => {
