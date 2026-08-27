@@ -1,20 +1,28 @@
 # SynSync Public Release Provenance
 
-Status: pre-release, unsigned
-Generated: 2026-05-15 America/Chicago
-Repository: knowurknottty/synsyncpro
+Status: **pre-release, unsigned**
 
-This document is the working provenance index for the SynSync public release. It is intentionally prepared before the final blockchain/IPFS/PGP steps so those identifiers can be added without changing the release architecture.
+Original snapshot generated: **2026-05-15 America/Chicago**
 
-No official release should be made until:
+Repository: `knowurknottty/synsyncpro-release-candidate`
 
-1. `LICENSE.md` is replaced with the final approved CAPT/BioCAPT Constitutional Commons license.
-2. The final release tree is hashed again.
-3. The release artifact is pinned to IPFS or equivalent content-addressed storage.
-4. The release hash is anchored through the selected blockchain/provenance workflow.
-5. The release commit and tag are PGP-signed by the owner.
+> **Current-status note — 2026-08-27:** this file contains a dated May 15 pre-release hash snapshot. The repository has advanced materially since that snapshot (including the August responsive-UI/PWA/service-worker/audio non-regression convergence). The hashes below are retained as historical provenance and **must not be presented as hashes of current `main`**. The final release tree must be hashed again after it is frozen.
 
-## Public Release Modules
+The canonical production Web/PWA source is `knowurknottty/synsyncpro_v1`. This repository remains the public release-candidate/provenance proof surface.
+
+## Final-release provenance gate
+
+No official signed release should be claimed until the selected final process is actually completed and recorded, including:
+
+1. final legal license text approved for the release;
+2. exact final release tree frozen and hashed again;
+3. content-addressed archival/pinning step completed if retained in the final provenance plan;
+4. selected timestamp/anchoring step completed if retained in the final provenance plan;
+5. owner-signed release commit/tag created if PGP signing remains the selected signing mechanism.
+
+The public GitHub repository itself is not evidence that those steps happened.
+
+## Public release modules in the provenance plan
 
 | Module | Protocol ID | Source |
 | --- | --- | --- |
@@ -24,7 +32,7 @@ No official release should be made until:
 | Anxiety | `anxiety_relief_v4` | `src/protocols/specs/sufferingReduction/suffering-reduction.spec.ts` |
 | Depression | `mood_elevator_v4` | `src/protocols/specs/sufferingReduction/suffering-reduction.spec.ts` |
 
-## FrankenCAPT Proof Surface
+## FrankenCAPT proof surface
 
 The public bridge is exposed as:
 
@@ -34,9 +42,9 @@ globalThis.__FRANKENCAPT_SYNSYNC__
 
 The bridge provides a sanitized handshake, public module manifests, challenge responses, playback delegation, state readout, and safety/evidence metadata. It must not expose raw source, private protocol corpus data, local file paths, secrets, private prompts, or private infrastructure details.
 
-## SHA-256 Hashes
+## Historical SHA-256 snapshot — 2026-05-15
 
-These hashes cover the current pre-release tree before final license replacement, IPFS pinning, and PGP signing.
+**These hashes are historical and intentionally not refreshed in-place.** They describe the May 15 pre-release snapshot named above, before the later UI/PWA/service-worker/audio hardening commits.
 
 ```text
 ba3547428170b1a2052599e318275b7561e917d8512bfcc5da038291b5c6eb40  README.md
@@ -60,9 +68,9 @@ ca1e6c04fdde0a1ff2f78f4dd72519b00076cbaf2a4ff12df5eee4799e82aac0  src/modules/Tr
 292defe9ddab09306cba67f4d387e0d67e677cff8ac8bcf16a069b4e94d27204  src/modules/BinauralBeatStereoWidthAnimator.ts
 ```
 
-## Verification Commands
+To check whether a working tree still matches that historical subset, run:
 
-```bash
+```zsh
 shasum -a 256 README.md LICENSE.md package.json package-lock.json App.tsx \
   services/AccessKeyService.ts services/ZipService.ts services/AudioEngine.ts \
   src/frankencapt/FrankenCAPTBridge.ts src/frankencapt/publicRelease.ts \
@@ -74,15 +82,28 @@ shasum -a 256 README.md LICENSE.md package.json package-lock.json App.tsx \
   src/modules/TransauralCrosstalkCancellation.ts \
   src/modules/SpatialAudioSceneDesigner.ts \
   src/modules/BinauralBeatStereoWidthAnimator.ts
-
-npm test -- --run --reporter=dot
-npm run type-check -- --pretty false
-npm run build
 ```
 
-## External Witnesses
+Differences are expected on current `main`; they mean the tree advanced, not that the historical snapshot should be silently rewritten.
 
-Fill these after the final release tree is frozen:
+## Current source verification commands
+
+For the current release-candidate source tree, use the repository's current validation surfaces rather than the historical hash block alone:
+
+```zsh
+npm ci
+npm run type-check -- --pretty false
+npm test -- --run --reporter=dot
+npm run validate:protocols
+npm run build
+npm run test:e2e
+```
+
+E2E verification requires the configured Playwright browser/runtime environment.
+
+## External witnesses
+
+These remain pending unless a later immutable release record supplies concrete identifiers:
 
 ```text
 IPFS CID: pending
@@ -97,11 +118,12 @@ PGP-signed commit: pending
 PGP-signed tag: pending
 ```
 
-## Release Notes
+Do not fill a field from inference. Record only an observed identifier for the exact release source/artifact it witnesses.
+
+## Release notes / boundaries
 
 - Public release access uses a local preview session by default.
 - Public preview `.syns` files round-trip only into local preview sessions and do not represent paid entitlement authority.
 - Client-side admin generation is disabled in public builds unless explicitly enabled in private development.
-- Portable export no longer bundles source files or LAN server scripts.
-- Stale codewiki ingestion payload containing private source snapshots was removed from the release candidate tree.
-- The final legal license still controls once approved and signed.
+- Portable export does not imply source or private-protocol export authority.
+- The final legal license and signed provenance record, once created, supersede this working pre-release index for release claims.
