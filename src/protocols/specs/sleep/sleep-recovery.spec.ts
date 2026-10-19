@@ -28,6 +28,8 @@ export const deepSleepDelta: ProtocolSpec = {
   name: 'Deep Sleep Delta Protocol',
   category: 'sleep_recovery',
   evidenceLevel: "III",
+  evidenceGrade: "C", // limited preliminary audio research
+  contraindicationsSeverity: "severe",
 
   usageGoal: "Exploratory sleep-oriented listening program; no validated N3-duration or sleep-latency effect for this exact protocol.",
 

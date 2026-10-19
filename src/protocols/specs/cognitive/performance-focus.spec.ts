@@ -26,6 +26,8 @@ export const professionalFocus: ProtocolSpec = {
   version: '2.0.0',
   durationSeconds: 2100,
   evidenceLevel: "III",
+  evidenceGrade: "C", // limited/indirect evidence, not validated product efficacy
+  contraindicationsSeverity: "severe",
 
   usageGoal: "Exploratory focus-oriented listening; sustained-attention outcomes have not been established for this exact program.",
 

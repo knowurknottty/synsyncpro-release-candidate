@@ -36,6 +36,11 @@ describe('public proof module metadata integrity', () => {
       expect(p.evidenceLevel).toBe(expectedLevels[item.protocolId]);
       expect(p.contraindications?.join(' ')).toMatch(/seizure|epilepsy/i);
     }
+    for (const item of FRANKENCAPT_RELEASE_MODULES) {
+      const p = PROTOCOLS[item.protocolId];
+      expect(p.evidenceGrade).toBe(item.protocolId === 'mood_elevator_v4' ? 'D' : 'C');
+      expect(p.contraindicationsSeverity).toBe('severe');
+    }
     expect(PROTOCOLS.mood_elevator_v4.category).toBe('speculative');
   });
 });

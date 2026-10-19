@@ -110,6 +110,8 @@ function adaptSpec(spec: ProtocolSpec) {
     title: spec.name,
     description: spec.usageGoal,
     evidenceLevel,
+    evidenceGrade: spec.evidenceGrade,
+    contraindicationsSeverity: spec.contraindicationsSeverity,
     citation: spec.citations[0] ?? '',
     category,
     section,

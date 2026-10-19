@@ -24,6 +24,8 @@ export const neuroAnalgesia: ProtocolSpec = {
   version: '2.0.0',
   durationSeconds: 1800,
   evidenceLevel: "III",
+  evidenceGrade: "C", // conservative metadata pending protocol-specific validation
+  contraindicationsSeverity: "severe",
   citations: [
     "Garcia-Argibay, M., Santed, M. A., & Reales, J. M. (2019). Efficacy of binaural auditory beats in cognition, anxiety, and pain perception: a meta-analysis. Psychological Research, 83, 357-372. DOI 10.1007/s00426-018-1066-8 (heterogeneous audio, not SynSync).",
   ],
@@ -115,6 +117,8 @@ export const anxietyRelief: ProtocolSpec = {
   version: '2.0.0',
   durationSeconds: 1200,
   evidenceLevel: "III",
+  evidenceGrade: "C", // conservative metadata pending protocol-specific validation
+  contraindicationsSeverity: "severe",
   citations: [
     "Padmanabhan, R., Hildreth, A. J., & Laws, D. (2005). A prospective, randomised, controlled study examining binaural beat audio and pre-operative anxiety. Anaesthesia, 60, 874-877. DOI 10.1111/j.1365-2044.2005.04287.x (different stimulus/population).",
     "Garcia-Argibay, M., Santed, M. A., & Reales, J. M. (2019). Efficacy of binaural auditory beats in cognition, anxiety, and pain perception: a meta-analysis. Psychological Research, 83, 357-372. DOI 10.1007/s00426-018-1066-8 (heterogeneous audio, not SynSync).",
@@ -283,6 +287,8 @@ export const moodElevator: ProtocolSpec = {
   version: '2.0.0',
   durationSeconds: 1200,
   evidenceLevel: "V",
+  evidenceGrade: "D", // conservative metadata pending protocol-specific validation
+  contraindicationsSeverity: "severe",
   citations: [
 
   ],
