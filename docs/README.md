@@ -23,6 +23,11 @@ SynSync Pro is a browser-based, programmable neuroacoustic engine. A session exe
 | Understand release status and licensing | [Release and provenance](RELEASE_AND_PROVENANCE.md) |
 | Review discovered risks | [Audit](REPOSITORY_AUDIT_2026-10-19.md) and [verification ledger](VERIFICATION_MATRIX.md) |
 | Decode terminology | [Glossary](GLOSSARY.md) and [FAQ](FAQ.md) |
+| Check accessibility and reduce sensory load | [Accessibility](ACCESSIBILITY.md) |
+| Prepare a formal research validation study | [Research validation](RESEARCH_VALIDATION.md) |
+| Map public feature coverage | [Feature coverage](FEATURE_COVERAGE.md) |
+| Maintain the docs and release discipline | [Maintainer guide](MAINTAINER_GUIDE.md) |
+| Onboard an authorized AI coding agent | [Agent onboarding](AGENT_ONBOARDING.md) |
 
 ## Source documentation worth preserving
 
