@@ -40,7 +40,8 @@ const App: React.FC = () => {
 
   const [activeProtocol, setActiveProtocol] = useState<Protocol | null>(null);
   const [appMode, setAppMode] = useState<'scientific' | 'speculative'>('scientific');
-  const [safetyCleared, setSafetyCleared] = useState(false);
+  const [clearedProtocolId, setClearedProtocolId] = useState<string | null>(null);
+  const safetyCleared = activeProtocol?.id != null && clearedProtocolId === activeProtocol.id;
   // Stable authorization ref for the in-page FrankenCAPT bridge. The only
   // clearance recognized is the one belonging to the UI-selected protocol.
   const bridgeSafetyRef = useRef<{ protocolId: string | null; cleared: boolean }>({
@@ -157,7 +158,7 @@ const App: React.FC = () => {
   }, [audioEngine]);
 
   useEffect(() => {
-    setSafetyCleared(false);
+    setClearedProtocolId(null);
   }, [activeProtocol?.id]);
 
   const handlePlay = useCallback(() => {
@@ -202,7 +203,8 @@ const App: React.FC = () => {
     audioState.currentProtocolId === activeProtocol?.id;
 
   const handleSafetyCleared = () => {
-    setSafetyCleared(true);
+    if (!activeProtocol) return;
+    setClearedProtocolId(activeProtocol.id);
     close('safetyGate');
     if (activeProtocol) {
       stop();
