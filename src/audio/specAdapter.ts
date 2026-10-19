@@ -110,7 +110,9 @@ function adaptSpec(spec: ProtocolSpec) {
   // Recovery from the 2026-06-11 desktop/mobile catalog by exact protocol ID.
   // Never mistake mechanically derived historical letter grades for new RCT evidence.
   const legacy = getLegacyProtocolMetadata(spec.id);
-  const sameHistoricalLevel = legacy?.evidenceLevel === spec.evidenceLevel;
+  // The older adapter normalized calibration 'Setup' to 'I' in exported JSON.
+  const historicalLevel = spec.evidenceLevel === 'Setup' ? 'I' : spec.evidenceLevel;
+  const sameHistoricalLevel = legacy?.evidenceLevel === historicalLevel;
   const evidenceGrade = spec.evidenceGrade ?? (sameHistoricalLevel ? legacy?.evidenceGrade : undefined);
   const minimumCurrentRisk = spec.contraindications.absolute.length > 0
     ? 'severe' : spec.contraindications.relative.length > 0 ? 'moderate' : 'mild';
