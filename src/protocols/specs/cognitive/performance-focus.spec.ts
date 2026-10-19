@@ -24,17 +24,17 @@ export const professionalFocus: ProtocolSpec = {
   name: 'Professional Focus Protocol v5.0',
   category: 'performance_focus',
   version: '2.0.0',
-  durationSeconds: 1500,
-  evidenceLevel: 'II',
+  durationSeconds: 2100,
+  evidenceLevel: "III",
 
-  usageGoal: '+150-300% sustained focus improvement, reduced distractibility, enhanced flow state with SMR and gamma binding.',
+  usageGoal: "Exploratory focus-oriented listening; sustained-attention outcomes have not been established for this exact program.",
 
-  algorithmDescription: '12-15Hz SMR (Sensorimotor Rhythm) with 40Hz Gamma and 20Hz Beta overlays using multi-modal entrainment. Targets prefrontal cortex precision with deep octave stacking for maximum neural engagement.',
+  algorithmDescription: "A programmed sequence of SMR-, beta-, and gamma-range beat/overlay layers with octave stacking; no demonstrated brain-region targeting.",
 
-  researchContext: 'Gamma binding supports global information processing while SMR prevents physical restlessness. Dual-frequency DBSS targets prefrontal cortex precision for sustained complex cognition (Beauchene et al. 2016).',
+  researchContext: "Garcia-Argibay et al. (2019) reviewed cognition in diverse binaural-beat studies, not this exact multi-layer protocol; effect sizes and EEG neurofeedback results cannot be transferred.",
 
   targetBands: ['smr', 'beta', 'gamma'],
-  neurochemistryTargets: ['Dopamine ↑', 'GABA ↑', 'Acetylcholine ↑'],
+  neurochemistryTargets: [], // unmeasured mechanisms
 
   phases: [
     phase(0, 'Alpha Baseline')
@@ -43,7 +43,7 @@ export const professionalFocus: ProtocolSpec = {
       .carrier(CARRIERS.bright)
       .noise('white', 0.05)
       .gentleCarrierOctaves()
-      .purpose('Establish baseline calm; prepare for SMR engagement')
+      .purpose('Present 10 Hz baseline beat layer')
       .build(),
 
     phase(1, 'SMR Activation Lock')
@@ -57,7 +57,7 @@ export const professionalFocus: ProtocolSpec = {
       .harmonics()
       .isochronic(0.6)
       .spatial('fixed')
-      .purpose('SMR + Gamma coupling; motor stillness + cognitive binding')
+      .purpose('Present 14 Hz beat with beta/gamma-related overlays')
       .build(),
 
     phase(2, 'Peak Gamma Focus')
@@ -71,7 +71,7 @@ export const professionalFocus: ProtocolSpec = {
       .harmonics()
       .hybrid(0.4)
       .stochasticJitter(12)
-      .purpose('Maximum focus intensity; complex binding and sustained attention')
+      .purpose('Present faster beat and modulation layers')
       .build(),
 
     phase(3, 'Sustained Focus Plateau')
@@ -81,7 +81,7 @@ export const professionalFocus: ProtocolSpec = {
       .noise('white', 0.05)
       .overlays([40], 0.15)
       .carrierOctaves({ enabled: true, octavesAbove: 1, octavesBelow: 0, gainRolloff: 0.65, detuneSpread: 3 })
-      .purpose('Maintain sustainable focus; prevents burnout')
+      .purpose('Return to gentler beat configuration')
       .build(),
   ],
 
@@ -105,18 +105,16 @@ export const professionalFocus: ProtocolSpec = {
   contraindications: {
     absolute: ['Epilepsy', 'History of seizures'],
     relative: ['Severe anxiety (use anxiety protocol first)'],
-    drugInteractions: ['May be synergistic with stimulants — use caution'],
-    specialPopulations: ['Safe for students, professionals'],
+    drugInteractions: ['Medication interactions have not been clinically evaluated.'],
+    specialPopulations: ['Safety in children and other vulnerable populations has not been established.'],
   },
-
   citations: [
-    'Beauchene, C. et al. (2016). Binaural beats and beta-frequency attention. Psychophysiology, 53(9), 1346-1353.',
-    'Lubar, J. & Shouse, M. (1976). EEG and behavioral changes in hyperkinetic child. Biofeedback Self-Regulation, 1(4), 405-425.',
+    "Garcia-Argibay, M., Santed, M. A., & Reales, J. M. (2019). Efficacy of binaural auditory beats in cognition, anxiety, and pain perception: a meta-analysis. Psychological Research, 83, 357-372. DOI 10.1007/s00426-018-1066-8 (different interventions).",
   ],
 
-  expectedTimeline: 'Session 1: Noticeable focus within 10 minutes. Week 1: 25-40% improved attention span. Week 4+: Sustained focus improvement.',
-  frequencyOfUse: '3-5x/week during work/study periods. Daily during intensive projects.',
-  optimalTiming: 'Morning or early afternoon (before 3PM). 30 minutes before demanding cognitive work.',
+  expectedTimeline: "No validated response timeline or percent focus improvement for this program; stop if overstimulating.",
+  frequencyOfUse: "No clinical dose/schedule established; use only when attentive listening is safe.",
+  optimalTiming: "Avoid use late in the day if activating or sleep-disrupting.",
   masterGain: DSP_DEFAULTS.masterGain,
   sampleRate: 48000,
   bitDepth: 24,

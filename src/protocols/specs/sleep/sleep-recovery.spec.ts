@@ -27,13 +27,13 @@ export const deepSleepDelta: ProtocolSpec = {
   id: 'deep_sleep_delta',
   name: 'Deep Sleep Delta Protocol',
   category: 'sleep_recovery',
-  evidenceLevel: 'I',
+  evidenceLevel: "III",
 
-  usageGoal: 'Fall asleep 50% faster, increase deep sleep (N3) duration by 40%, wake feeling restored. Clinical studies show significant improvement in sleep quality.',
+  usageGoal: "Exploratory sleep-oriented listening program; no validated N3-duration or sleep-latency effect for this exact protocol.",
 
-  algorithmDescription: '3Hz delta binaural beats with 0.25Hz infraslow modulation to shorten sleep latency and extend N3 deep sleep stage. Enhanced with deep octave stacking and breathe spatial motion for maximum entrainment depth.',
+  algorithmDescription: "A 90-minute program with 8-to-3 Hz descent, 3 Hz sustain, then a 0.25 Hz beat layer; includes colored noise and spatial motion.",
 
-  researchContext: '3Hz delta beats increase N3 duration and shorten N3 latency with strong negative correlation (r=-0.59). 0.25Hz beats entrain slow-wave oscillations (Zhou et al. 2022, NIH Sleep Studies 2024).',
+  researchContext: "Fan et al. (2024) reported shorter N2/N3 latencies in a small 12-participant daytime-nap study of 0.25 Hz beats, but no significant low-frequency EEG entrainment or delta/sigma changes; this 90-minute program was not tested.",
 
   durationSeconds: 5400, // 90 minutes
 
@@ -46,7 +46,7 @@ export const deepSleepDelta: ProtocolSpec = {
       .overlays([SOLFEGGIO.MI], 0.1)
       .gentleCarrierOctaves()
       
-      .purpose('Gradual descent from waking alpha to deep delta')
+      .purpose('Gradually shift programmed beat from 8 Hz to 3 Hz')
       .build(),
 
     phase(1, 'Deep Delta Sustain')
@@ -58,7 +58,7 @@ export const deepSleepDelta: ProtocolSpec = {
       .deepCarrierOctaves()
       .spatial('breathe')
       .hybrid(0.3)
-      .purpose('Maintain N3 deep sleep with infraslow modulation')
+      .purpose('Sustain a 3 Hz beat; actual N3 sleep stage is not measured')
       .build(),
 
     phase(2, 'Infraslow Consolidation')
@@ -69,7 +69,7 @@ export const deepSleepDelta: ProtocolSpec = {
       .overlays([SCHUMANN_BASE], 0.15)
       .gentleCarrierOctaves()
       
-      .purpose('Ultra-slow oscillations for sleep consolidation')
+      .purpose('Introduce 0.25 Hz beat in final phase; no proven sleep consolidation')
       .build(),
   ],
 
@@ -91,15 +91,13 @@ export const deepSleepDelta: ProtocolSpec = {
   },
 
   contraindications: {
-    absolute: ['Sleep apnea (consult physician before use)'],
+    absolute: ['Seizure history: consult a clinician before using rhythmic stimulation', 'Sleep apnea (consult physician before use)'],
     relative: ['Heavy machinery operation within 2 hours of use', 'Driving immediately after protocol'],
     drugInteractions: [],
     specialPopulations: [],
   },
-
   citations: [
-    'Zhou, J. et al. (2022). Delta-frequency binaural beats enhance N3 sleep duration. Sleep Medicine Research, 13(2), 145-156.',
-    'NIH Sleep Quality Studies (2024). Infraslow oscillation effects on sleep architecture.',
+    "Fan, Z., Zhu, Y., Suzuki, C., et al. (2024). Binaural beats at 0.25 Hz shorten the latency to slow-wave sleep during daytime naps. Scientific Reports 14, 26062. DOI 10.1038/s41598-024-76059-9 (different protocol; 12 adults).",
   ],
 };
 
