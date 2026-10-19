@@ -115,14 +115,41 @@ describe('FrankenCAPTBridge', () => {
     expect(target[FRANKENCAPT_GLOBAL_KEY]).toBeUndefined();
   });
 
-  it('delegates playback through the real engine wrapper', async () => {
+  it('denies direct bridge playback before UI clearance even for public modules', async () => {
     const engine = createMockEngine();
     const bridge = new FrankenCAPTBridge(engine);
-    const receipt = await bridge.play(protocol);
+    await expect(bridge.play(getFrankenCAPTReleaseProtocol('focus')))
+      .rejects.toThrow(/interactive protocol-specific safety clearance/);
+    expect(engine.unlock).not.toHaveBeenCalled();
+    expect(engine.playProtocol).not.toHaveBeenCalled();
+  });
 
-    expect(engine.unlock).toHaveBeenCalled();
-    expect(engine.playProtocol).toHaveBeenCalledWith(protocol);
+  it('rejects arbitrary protocols even if a UI authorization callback is permissive', async () => {
+    const engine = createMockEngine();
+    const bridge = new FrankenCAPTBridge(engine, () => true);
+    await expect(bridge.play(protocol)).rejects.toThrow(/five public release modules/);
+    expect(engine.playProtocol).not.toHaveBeenCalled();
+  });
+
+  it('dispatches only the canonical public spec after protocol-specific UI clearance', async () => {
+    const engine = createMockEngine();
+    const releaseProtocol = getFrankenCAPTReleaseProtocol('focus');
+    const bridge = new FrankenCAPTBridge(engine, (id) => id === releaseProtocol.id);
+    // A caller cannot swap in different phases under a public protocol ID.
+    const substituted = { ...releaseProtocol, phases: [{ ...releaseProtocol.phases[0], carrier: 9000 }] } as Protocol;
+    const receipt = await bridge.play(substituted);
+    expect(engine.unlock).toHaveBeenCalledTimes(1);
+    expect(engine.playProtocol).toHaveBeenCalledWith(releaseProtocol);
+    expect(engine.playProtocol).not.toHaveBeenCalledWith(substituted);
     expect(receipt.action).toBe('play');
     expect(receipt.protocolHash).toMatch(/^fnv1a32:/);
+  });
+
+  it('constrains bridge volume requests to the shared master-gain limit', () => {
+    const engine = createMockEngine();
+    const bridge = new FrankenCAPTBridge(engine);
+    bridge.setVolume(9);
+    expect(engine.setVolume).toHaveBeenCalledWith(0.7);
+    expect(() => bridge.setVolume(Number.NaN)).toThrow(/finite/);
   });
 });

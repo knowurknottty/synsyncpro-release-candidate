@@ -1,4 +1,5 @@
 import { AudioEngine } from '../../services/AudioEngine.ts';
+import { clampMasterGain } from '../audio/safetyLimits.ts';
 import { classifyProtocolSafety, type ProtocolSafetyProfile } from '../../services/ProtocolSafety.ts';
 import type { AudioState, Protocol, QAMetrics } from '../../types.ts';
 import {
@@ -131,8 +132,14 @@ const EMPTY_DISCLOSURE = {
   exposesSecrets: false,
 } as const;
 
+/** Only the owning UI can confirm per-protocol interactive safety clearance. */
+export type FrankenCAPTPlaybackAuthorization = (protocolId: string) => boolean;
+
 export class FrankenCAPTBridge implements FrankenCAPTBridgeApi {
-  constructor(private readonly audioEngine: AudioEngine) {}
+  constructor(
+    private readonly audioEngine: AudioEngine,
+    private readonly isPlaybackAuthorized: FrankenCAPTPlaybackAuthorization = () => false,
+  ) {}
 
   handshake(): FrankenCAPTHandshake {
     const issuedAt = new Date().toISOString();
@@ -189,10 +196,22 @@ export class FrankenCAPTBridge implements FrankenCAPTBridgeApi {
   }
 
   async play(protocol: Protocol): Promise<FrankenCAPTReceipt> {
-    assertPlayable(protocol);
+    // Caller-provided protocols are never directly dispatched from this public proof bridge.
+    // Resolve from the five audited public module ids, discarding caller-supplied phase data.
+    const releaseModule = FRANKENCAPT_RELEASE_MODULES.find((item) => item.protocolId === protocol?.id);
+    if (!releaseModule) {
+      throw new Error('FrankenCAPT playback is restricted to the five public release modules.');
+    }
+    const canonicalProtocol = getFrankenCAPTReleaseProtocol(releaseModule.moduleId);
+    assertPlayable(canonicalProtocol);
+    // The bridge defaults to fail-closed; only an interactive UI clearance scoped to
+    // the currently selected protocol permits playback. A local JS API is not DRM.
+    if (!this.isPlaybackAuthorized(canonicalProtocol.id)) {
+      throw new Error('FrankenCAPT playback requires interactive protocol-specific safety clearance in the UI.');
+    }
     await this.audioEngine.unlock?.();
-    await this.audioEngine.playProtocol(protocol);
-    return this.receipt('play', this.inspectProtocol(protocol).manifestHash);
+    await this.audioEngine.playProtocol(canonicalProtocol);
+    return this.receipt('play', this.inspectProtocol(canonicalProtocol).manifestHash);
   }
 
   stop(): FrankenCAPTReceipt {
@@ -204,7 +223,7 @@ export class FrankenCAPTBridge implements FrankenCAPTBridgeApi {
     if (!Number.isFinite(volume)) {
       throw new Error('FrankenCAPT volume must be a finite number.');
     }
-    const clampedVolume = Math.max(0, Math.min(1, volume));
+    const clampedVolume = clampMasterGain(volume);
     this.audioEngine.setVolume(clampedVolume);
     return this.receipt('volume');
   }
@@ -276,8 +295,9 @@ function releaseSummary(): FrankenCAPTHandshake['release'] {
 export function installFrankenCAPTBridge(
   audioEngine: AudioEngine,
   target: InstallTarget = globalThis as unknown as InstallTarget,
+  isPlaybackAuthorized: FrankenCAPTPlaybackAuthorization = () => false,
 ): () => void {
-  const bridge = new FrankenCAPTBridge(audioEngine);
+  const bridge = new FrankenCAPTBridge(audioEngine, isPlaybackAuthorized);
 
   Object.defineProperty(target, FRANKENCAPT_GLOBAL_KEY, {
     value: bridge.toPublicApi(),

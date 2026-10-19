@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Protocol, AccessSession, UserData } from './types.ts';
 import { useTheme } from './contexts/ThemeContext.tsx';
 import { useMotion } from './contexts/MotionContext.tsx';
@@ -41,6 +41,12 @@ const App: React.FC = () => {
   const [activeProtocol, setActiveProtocol] = useState<Protocol | null>(null);
   const [appMode, setAppMode] = useState<'scientific' | 'speculative'>('scientific');
   const [safetyCleared, setSafetyCleared] = useState(false);
+  // Stable authorization ref for the in-page FrankenCAPT bridge. The only
+  // clearance recognized is the one belonging to the UI-selected protocol.
+  const bridgeSafetyRef = useRef<{ protocolId: string | null; cleared: boolean }>({
+    protocolId: null,
+    cleared: false,
+  });
   const [uiMode, setUiMode] = useState<'guided' | 'expert'>(
     () => (localStorage.getItem('synsync_ui_mode') as 'guided' | 'expert') || 'guided'
   );
@@ -135,9 +141,19 @@ const App: React.FC = () => {
     artist: 'SynSync Pro',
   });
 
+  bridgeSafetyRef.current = {
+    protocolId: activeProtocol?.id ?? null,
+    cleared: safetyCleared,
+  };
+
   useEffect(() => {
     if (!audioEngine) return undefined;
-    return installFrankenCAPTBridge(audioEngine);
+    return installFrankenCAPTBridge(
+      audioEngine,
+      globalThis as unknown as Record<string, unknown>,
+      (protocolId) => bridgeSafetyRef.current.cleared &&
+        bridgeSafetyRef.current.protocolId === protocolId,
+    );
   }, [audioEngine]);
 
   useEffect(() => {
