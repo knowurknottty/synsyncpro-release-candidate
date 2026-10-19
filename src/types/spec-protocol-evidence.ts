@@ -37,6 +37,8 @@ export type EvidenceSourceType =
   | 'RCT'
   | 'MetaAnalysis'
   | 'SystematicReview'
+  | 'IntegrativeReview'
+  | 'ControlledPilot'
   | 'Cohort'
   | 'CaseSeries'
   | 'Mechanistic'

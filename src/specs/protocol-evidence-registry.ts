@@ -36,17 +36,17 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
         citation:
           'Marshall, L., Helgadóttir, H., Mölle, M., & Born, J. (2006). Boosting slow oscillations during sleep potentiates memory. Nature, 444(7119), 610-613.',
         doiOrUrl: 'https://doi.org/10.1038/nature05278',
-        note: 'Transcranial electrical slow-oscillation stimulation (0.75 Hz), NOT binaural/isocronic auditory stimulation; provides no direct effect estimate for SynSync audio.',
+        note: 'Transcranial electrical slow-oscillation stimulation (0.75 Hz), NOT binaural/isochronic auditory stimulation; provides no direct effect estimate for SynSync audio.',
       },
       {
-        type: 'SystematicReview',
+        type: 'IntegrativeReview',
         citation:
           'Cidral-Filho, F. J., Porter, P., & Donatello, N. N. (2025). An Integrative Review of Brainwave Entrainment Benefits for Human Health. Applied Psychophysiology and Biofeedback, 50, 3-9.',
         doiOrUrl: 'https://doi.org/10.1007/s10484-024-09682-x',
         note: 'Broad 84-study review spanning heterogeneous modalities and outcomes; not a trial of this specific audio protocol. The authors recommend stronger controlled research.',
       },
       {
-        type: 'Cohort',
+        type: 'ControlledPilot',
         citation:
           'Fan, Z., Zhu, Y., Suzuki, C., et al. (2024). Binaural beats at 0.25 Hz shorten the latency to slow-wave sleep during daytime naps. Scientific Reports, 14, 26062.',
         doiOrUrl: 'https://doi.org/10.1038/s41598-024-76059-9',
@@ -121,7 +121,7 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
         note: '95.6% classification accuracy for anxiety levels using EEG + binaural beat intervention. Strong neuro-physiological validation.',
       },
       {
-        type: 'SystematicReview',
+        type: 'IntegrativeReview',
         citation:
           'Cidral-Filho, F. J., Porter, P., & Donatello, N. N. (2025). An Integrative Review of Brainwave Entrainment Benefits for Human Health.',
         doiOrUrl: 'https://doi.org/10.1007/s10484-024-09682-x',

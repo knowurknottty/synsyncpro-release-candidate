@@ -48,11 +48,23 @@ describe('AudioEngine', () => {
       }).not.toThrow();
     });
 
-    it('should clamp volume to 0-1', () => {
-      engine.setVolume(1.5);
-      engine.setVolume(-0.5);
-      // Should not throw
-      expect(engine).toBeDefined();
+    it('enforces 0.7 normalized master gain at the engine boundary', () => {
+      const setTargetAtTime = vi.fn();
+      const savedContext = engine.ctx;
+      const savedGain = engine.masterGain;
+      try {
+        engine.ctx = { currentTime: 12 } as AudioContext;
+        engine.masterGain = { gain: { setTargetAtTime } } as unknown as GainNode;
+        engine.setVolume(1.5);
+        engine.setVolume(-0.5);
+        engine.setVolume(Number.NaN);
+        expect(setTargetAtTime).toHaveBeenNthCalledWith(1, 0.7, 12, 0.02);
+        expect(setTargetAtTime).toHaveBeenNthCalledWith(2, 0, 12, 0.02);
+        expect(setTargetAtTime).toHaveBeenNthCalledWith(3, 0, 12, 0.02);
+      } finally {
+        engine.ctx = savedContext;
+        engine.masterGain = savedGain;
+      }
     });
 
     it('should have setMasterGain alias', () => {
