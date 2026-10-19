@@ -21,42 +21,36 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
   // ========================================
   {
     protocolId: 'deep_sleep_delta',
-    primaryOutcome: 'Shorter sleep latency and increased slow-wave sleep (N3) duration',
+    primaryOutcome: 'Exploratory sleep-onset support; efficacy of this exact audio protocol has not been established',
     secondaryOutcomes: [
-      'Improved next-day alertness',
-      'Enhanced memory consolidation',
+      'Next-day alertness is a proposed measurement endpoint, not an established effect',
+      'Memory consolidation requires direct protocol-specific evaluation',
     ],
     mechanismSummary:
-      'Delta-frequency (0.5-4 Hz) auditory entrainment guides thalamocortical networks toward slow oscillations characteristic of deep sleep. Slow-wave enhancement supports glymphatic clearance and synaptic homeostasis.',
-    evidenceLevel: 'I', // Marshall et al. 2006 Nature = gold-standard RCT [source 69]
-    evidenceGrade: 'A',
+      'Low-frequency binaural stimulation has limited early human sleep research. A small daytime-nap study reported shorter stage latencies without significant low-frequency EEG entrainment; direct N3, glymphatic, and memory benefits from this exact audio protocol remain untested.',
+    evidenceLevel: 'III', // Small pilot audio study; electrical-stimulation results are not transferable
+    evidenceGrade: 'C',
     sources: [
-      {
-        type: 'RCT',
-        citation:
-          'Marshall, L., Helgadóttir, H., Mölle, M., & Born, J. (2006). Boosting slow oscillations during sleep potentiates memory. Nature, 444(7119), 610-613.',
-        doiOrUrl: 'https://doi.org/10.1038/nature05278',
-        note: 'Gold-standard RCT: 0.75 Hz stimulation during sleep increased slow-wave activity and memory consolidation.',
-      },
-      {
-        type: 'MetaAnalysis',
-        citation:
-          'Jirakittayakorn & Wongsawat (2025). Integrative review of brainwave entrainment: 84 studies across pain, sleep, mood, cognition.',
-        note: '84-study review confirms non-invasive neuromodulation efficacy for sleep improvement.',
-      },
-      {
-        type: 'RCT',
-        citation:
-          'Lee et al. (2024). Binaural beats reduce insomnia symptoms via increased slow-wave sleep. Quantitative EEG analysis.',
-        note: 'Two-week intervention showed measurable EEG improvements in subclinical insomnia population.',
-        grade: 'B',
-      },
       {
         type: 'Mechanistic',
         citation:
-          'Rimmele et al. (2024). Binaural beats at 0.25 Hz shorten latency to slow-wave sleep during daytime naps. Nature Scientific Reports.',
+          'Marshall, L., Helgadóttir, H., Mölle, M., & Born, J. (2006). Boosting slow oscillations during sleep potentiates memory. Nature, 444(7119), 610-613.',
+        doiOrUrl: 'https://doi.org/10.1038/nature05278',
+        note: 'Transcranial electrical slow-oscillation stimulation (0.75 Hz), NOT binaural/isocronic auditory stimulation; provides no direct effect estimate for SynSync audio.',
+      },
+      {
+        type: 'SystematicReview',
+        citation:
+          'Cidral-Filho, F. J., Porter, P., & Donatello, N. N. (2025). An Integrative Review of Brainwave Entrainment Benefits for Human Health. Applied Psychophysiology and Biofeedback, 50, 3-9.',
+        doiOrUrl: 'https://doi.org/10.1007/s10484-024-09682-x',
+        note: 'Broad 84-study review spanning heterogeneous modalities and outcomes; not a trial of this specific audio protocol. The authors recommend stronger controlled research.',
+      },
+      {
+        type: 'Cohort',
+        citation:
+          'Fan, Z., Zhu, Y., Suzuki, C., et al. (2024). Binaural beats at 0.25 Hz shorten the latency to slow-wave sleep during daytime naps. Scientific Reports, 14, 26062.',
         doiOrUrl: 'https://doi.org/10.1038/s41598-024-76059-9',
-        note: '0.25 Hz beats significantly shortened N3 latency, confirming delta entrainment hypothesis.',
+        note: 'Within-participant study of 12 healthy adults: N2/N3 latencies were shorter than sham, but no significant entrainment of 0.25/1 Hz neural oscillations or delta/sigma changes was observed. Results do not confirm the delta-entrainment hypothesis.',
       },
     ],
     claimGuardrails: [
@@ -64,9 +58,8 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
         id: 'sleep-latency',
         claim: 'Falls asleep faster',
         allowedWording: [
-          'may help you fall asleep faster when used consistently',
-          'may support shorter time to fall asleep',
-          'designed to guide your brain toward sleep-ready states',
+          'designed for a gentle, structured sleep-onset listening experience',
+          'exploratory audio protocol informed by preliminary sleep research',
         ],
         forbiddenWording: [
           'guarantees instant sleep',
@@ -75,15 +68,14 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
           'treats clinical insomnia',
         ],
         rationale:
-          'Delta entrainment has RCT support for improving sleep architecture, but individual response varies. Never replace medical evaluation for persistent insomnia.',
+          'The small Fan et al. 2024 audio study observed sleep-stage latency differences, not robust EEG entrainment or verified SynSync effects. Medical care remains necessary for clinical sleep disorders.',
       },
       {
         id: 'deep-sleep-duration',
         claim: 'Increases deep sleep',
         allowedWording: [
-          'may increase time spent in deep slow-wave sleep',
-          'supports healthy sleep architecture',
-          'designed to enhance slow oscillations during sleep',
+          'explores low-frequency binaural stimulation during rest',
+          'N3 duration effects of this specific protocol have not been established',
         ],
         forbiddenWording: [
           'guarantees N3 increase',
@@ -91,31 +83,13 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
           'replaces CPAP or medical interventions',
         ],
         rationale:
-          'Marshall 2006 Nature study + recent replications support mechanism. Frame as support, not treatment.',
-      },
-    ],
-    effectSizeEstimates: [
-      {
-        outcomeMetric: 'Sleep latency (minutes)',
-        value: -30,
-        unit: 'percent',
-        interpretation:
-          'Approx. 30% reduction in time to fall asleep vs baseline in combined binaural beat studies (Lee 2024, Rimmele 2024).',
-        sourceId: 'lee-2024-insomnia',
-      },
-      {
-        outcomeMetric: 'Slow-wave sleep duration (minutes)',
-        value: 25,
-        unit: 'percent',
-        interpretation:
-          'Marshall 2006 showed ~25% increase in slow oscillation power; translates to measurable N3 duration gains.',
-        sourceId: 'marshall-2006-nature',
+          'Marshall 2006 used transcranial electrical stimulation; its sleep/memory outcomes must not be transferred to this auditory protocol.',
       },
     ],
     flags: {
-      mixedEvidence: false, // Multiple convergent RCTs
-      speculativeMechanism: false, // Mechanism well-established (thalamocortical slow oscillations)
-      offLabel: false, // Direct target population (sleep optimization)
+      mixedEvidence: true,
+      speculativeMechanism: true,
+      offLabel: true, // Electrical-stimulation and heterogeneous-review findings are not audio-protocol trials
     },
   },
 
@@ -149,8 +123,9 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
       {
         type: 'SystematicReview',
         citation:
-          'Jirakittayakorn & Wongsawat (2025). 84-study integrative review: binaural beats show consistent mood and anxiety benefits.',
-        note: 'Large-scale review confirms anxiolytic effects across multiple domains.',
+          'Cidral-Filho, F. J., Porter, P., & Donatello, N. N. (2025). An Integrative Review of Brainwave Entrainment Benefits for Human Health.',
+        doiOrUrl: 'https://doi.org/10.1007/s10484-024-09682-x',
+        note: 'Heterogeneous 84-study integrative review across several modalities. Does not establish a clinical effect for SynSync anxiety audio; interpret cautiously.',
       },
       {
         type: 'Mechanistic',
@@ -199,23 +174,23 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
   // ========================================
   {
     protocolId: 'focus_v5_professional',
-    primaryOutcome: 'Enhanced sustained attention and reduced impulsivity',
+    primaryOutcome: 'Exploratory attention-oriented audio protocol; direct clinical effects not established',
     secondaryOutcomes: [
       'Improved cognitive task performance',
-      'Reduced ADHD symptoms',
-      'Increased working memory capacity',
+      'ADHD symptom effects would require protocol-specific clinical trials',
+      'Working-memory effects remain a research question',
     ],
     mechanismSummary:
-      'SMR (12-15 Hz) training strengthens thalamocortical gating and inhibitory control. Gamma (40 Hz) binding supports working memory and attentional coherence. Combined SMR + gamma creates executive function scaffold.',
-    evidenceLevel: 'I', // Lubar & Shouse 1976 + FDA-cleared neurofeedback protocols
-    evidenceGrade: 'A',
+      'This protocol combines SMR-range and gamma-range auditory modulation. EEG neurofeedback research at similar frequencies is a different intervention and cannot demonstrate cognitive improvements from this audio protocol.',
+    evidenceLevel: 'III', // No direct controlled evidence for this exact audio protocol is established here
+    evidenceGrade: 'C',
     sources: [
       {
-        type: 'RCT',
+        type: 'Mechanistic',
         citation:
-          'Lubar, J. F., & Shouse, M. N. (1976). EEG and behavioral changes in a hyperkinetic child concurrent with training of the sensorimotor rhythm (SMR). Biofeedback and Self-Regulation, 1(3), 293-306.',
-        note: 'Landmark RCT: SMR training achieved 40-50% reduction in ADHD symptoms. Now FDA-cleared for clinical use.',
-        grade: 'A',
+          'Lubar, J. F., & Shouse, M. N. (1976). EEG and behavioral changes in a hyperkinetic child concurrent with training of the sensorimotor rhythm (SMR): a preliminary report. Biofeedback and Self-Regulation, 1(3), 293-306.',
+        doiOrUrl: 'https://doi.org/10.1007/BF01001170',
+        note: 'Preliminary single-child EEG neurofeedback report, not an RCT and not an audio entrainment study. Its outcomes must not be quoted as SynSync effect sizes.',
       },
       {
         type: 'MetaAnalysis',
@@ -238,7 +213,7 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
         allowedWording: [
           'may support attention and impulse control',
           'designed to strengthen focus circuits',
-          'based on neurofeedback protocols shown to reduce ADHD symptoms in clinical trials',
+          'exploratory audio design inspired by frequency bands studied in EEG research',
         ],
         forbiddenWording: [
           'cures ADHD',
@@ -247,23 +222,13 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
           'eliminates need for stimulant medication',
         ],
         rationale:
-          'SMR neurofeedback has FDA clearance for ADHD, but this is an audio-based analog. Frame as support tool, not clinical treatment.',
-      },
-    ],
-    effectSizeEstimates: [
-      {
-        outcomeMetric: 'ADHD symptom scores',
-        value: -45,
-        unit: 'percent',
-        interpretation:
-          'Lubar & Shouse 1976: 40-50% reduction in ADHD symptoms after SMR neurofeedback training. Audio entrainment uses same frequency target.',
-        sourceId: 'lubar-1976-smr',
+          'EEG neurofeedback results and regulatory status are not transferable to a binaural/isochronic audio tool; the SynSync protocol has not demonstrated clinical ADHD efficacy.',
       },
     ],
     flags: {
-      mixedEvidence: false,
-      speculativeMechanism: false,
-      offLabel: true, // Audio entrainment is NOT the same as neurofeedback training (though mechanism is similar)
+      mixedEvidence: true,
+      speculativeMechanism: true,
+      offLabel: true, // Neurofeedback and audio entrainment are different interventions
     },
   },
 
