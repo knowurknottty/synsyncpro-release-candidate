@@ -110,15 +110,17 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
       {
         type: 'RCT',
         citation:
-          'Padmanabhan et al. (2005). Binaural beats reduced pre-operative anxiety by 26% vs music control in surgical patients.',
-        note: 'RCT with active control condition (music alone). Significant anxiety reduction via binaural beat audio.',
+          'Padmanabhan, R., Hildreth, A. J., & Laws, D. (2005). A prospective, randomised, controlled study examining binaural beat audio and pre-operative anxiety in day-case surgery. Anaesthesia, 60, 874-877.',
+        doiOrUrl: 'https://doi.org/10.1111/j.1365-2044.2005.04287.x',
+        note: 'Different 30-minute commercial soundtrack in pre-operative patients: 26.3% within-group score decrease versus 11.1% audio-only and 3.8% no intervention; not a SynSync estimate.',
         grade: 'A',
       },
       {
-        type: 'Cohort',
+        type: 'MetaAnalysis',
         citation:
-          'García-Argibay et al. (2024). Theta, alpha, and beta binaural beats reduced anxiety and improved autonomic markers in college students.',
-        note: '95.6% classification accuracy for anxiety levels using EEG + binaural beat intervention. Strong neuro-physiological validation.',
+          'Garcia-Argibay, M., Santed, M. A., & Reales, J. M. (2019). Efficacy of binaural auditory beats in cognition, anxiety, and pain perception: a meta-analysis. Psychological Research, 83, 357-372.',
+        doiOrUrl: 'https://doi.org/10.1007/s00426-018-1066-8',
+        note: 'Meta-analysis of 22 heterogeneous studies and 35 effect sizes (overall Hedges g = 0.45); does not validate this specific program or imply benzodiazepine equivalence.',
       },
       {
         type: 'IntegrativeReview',
@@ -140,9 +142,8 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
         id: 'anxiety-reduction',
         claim: 'Reduces anxiety',
         allowedWording: [
-          'may help reduce feelings of anxiety when used regularly',
-          'designed to support calm and emotional regulation',
-          'may decrease state anxiety during acute stress',
+          'exploratory calming audio with staged theta and alpha stimuli',
+          'designed for a relaxing listening experience, with uncertain individual response',
         ],
         forbiddenWording: [
           'cures anxiety disorders',
@@ -151,17 +152,7 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
           'eliminates all anxiety permanently',
         ],
         rationale:
-          'RCT evidence for acute state anxiety reduction (26% in surgical setting). Not a replacement for clinical anxiety treatment.',
-      },
-    ],
-    effectSizeEstimates: [
-      {
-        outcomeMetric: 'Pre-operative anxiety score',
-        value: -26,
-        unit: 'percent',
-        interpretation:
-          '26% reduction in anxiety scores vs music-only control in Padmanabhan 2005 RCT.',
-        sourceId: 'padmanabhan-2005-surgery',
+          'A different pre-operative binaural soundtrack was studied in an RCT; its outcome must not be transferred as a numeric efficacy estimate for this protocol. Not clinical treatment.',
       },
     ],
     flags: {
