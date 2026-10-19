@@ -18,6 +18,7 @@ export type RvpSeverity = 1 | 2 | 3; // 1=info, 2=warning, 3=error
 export type RvpIssueCode =
   | 'MISSING_EVIDENCE_METADATA'
   | 'MISSING_SAFETY_METADATA'
+  | 'UNVERIFIED_LEGACY_METADATA'
   | 'INVALID_PHASE_DURATION'
   | 'INVALID_PROTOCOL_DURATION'
   | 'BEAT_OUT_OF_RANGE'
@@ -268,6 +269,19 @@ export function validateProtocols(protocols: Protocol[] | Record<string, Protoco
         severity: 2,
         code: 'MISSING_SAFETY_METADATA',
         message: `Protocol ${protocol.id} is missing contraindications and/or contraindicationsSeverity`,
+      });
+    }
+
+    // Restored values are historically traceable, not clinically verified.
+    // Keep an explicit release-readiness warning rather than silently treating
+    // the old inferred A/B/C grades as new clinical validation.
+    if (protocol.metadataProvenance === 'legacy-restored-unverified') {
+      allIssues.push({
+        protocolId: protocol.id,
+        level: 'warning',
+        severity: 1,
+        code: 'UNVERIFIED_LEGACY_METADATA',
+        message: `Protocol ${protocol.id} has recovered historical evidence/safety labels that still require source-level review`,
       });
     }
 

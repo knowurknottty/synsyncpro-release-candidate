@@ -19,21 +19,21 @@ import { gentleOctaves, deepOctaves, createOctaveConfig } from '../../../audio/d
 // ─── 1. NeuroAnalgesia (Chronic Pain Management) ────────────────────
 export const neuroAnalgesia: ProtocolSpec = {
   id: 'neuro_analgesia',
-  name: 'NeuroAnalgesia (Chronic Pain Management)',
+  name: "NeuroAnalgesia (Exploratory Pain-Coping Audio)",
   category: 'suffering_reduction',
   version: '2.0.0',
   durationSeconds: 1800,
-  evidenceLevel: 'II',
+  evidenceLevel: "III",
+  evidenceGrade: "C", // conservative metadata pending protocol-specific validation
+  contraindicationsSeverity: "severe",
   citations: [
-    'Ecsy, K. et al. (2017) "Neural Mechanisms of Chronic Pain." J Pain Res, 10, 2189-2209',
-    'Osada, T. et al. (2011) "Audio-Visual Frequency Entrainment and Pain Perception." Eur J Pain, 15(2), 139-146',
-    'Chaudhury, S. et al. (2015) "Meditation and Pain Perception." JACM, 21(1), 33-40',
+    "Garcia-Argibay, M., Santed, M. A., & Reales, J. M. (2019). Efficacy of binaural auditory beats in cognition, anxiety, and pain perception: a meta-analysis. Psychological Research, 83, 357-372. DOI 10.1007/s00426-018-1066-8 (heterogeneous audio, not SynSync).",
   ],
-  usageGoal: 'Reduce chronic pain 25-40% (session 1), 50-60% (week 8+) via endorphin cascade and thalamocortical disruption',
-  algorithmDescription: 'Alpha stabilization → delta descent to trigger endogenous opioid release. Solfeggio 528Hz overlay targets cellular resonance. Disrupts thalamocortical dysrhythmia — the feedback loop that amplifies chronic pain signals.',
-  researchContext: 'Combined alpha-delta approach more effective than single frequency (Ecsy 2017). 10Hz alpha entrainment raises pain threshold by 25% via endorphin release (Osada 2011). Alpha states consistently associated with pain relief across meditation research (Chaudhury 2015).',
+  usageGoal: "Exploratory relaxation and pain-coping support using staged sound; no clinical pain reduction established for this specific audio program.",
+  algorithmDescription: "Alpha-to-delta rhythmic progression with colored noise, spatial motion and tonal overlays; no demonstrated endogenous opioid release or cellular resonance effects.",
+  researchContext: "A 2019 meta-analysis investigated binaural audio and pain perception across heterogeneous studies; findings do not establish pain thresholds, analgesic effects or specific outcome percentages for this program.",
   targetBands: ['alpha', 'delta'],
-  neurochemistryTargets: ['Endorphins ↑↑', 'Serotonin ↑', 'Cortisol ↓', 'Substance P ↓'],
+  neurochemistryTargets: [], // neurotransmitters not measured
   phases: [
     phase(0, 'Alpha Grounding')
       .duration(300)
@@ -42,7 +42,7 @@ export const neuroAnalgesia: ProtocolSpec = {
       .noise('pink', 0.10)
       .gentleCarrierOctaves()
       .spatial('rotate', 0.1)
-      .purpose('Ground nervous system in alpha safety; reduce acute pain perception')
+      .purpose('Present 10 Hz rhythmic audio with low-level pink noise')
       .build(),
 
     phase(1, 'Alpha-Theta Transition')
@@ -54,10 +54,10 @@ export const neuroAnalgesia: ProtocolSpec = {
       .gentleCarrierOctaves()
       .gentleOverlayOctaves()
       .spatial('rotate', 0.08)
-      .purpose('Gradual descent toward endorphin-release zone')
+      .purpose('Gradually shift beat from 10 Hz toward 6 Hz')
       .build(),
 
-    phase(2, 'Deep Delta Pain Relief')
+    phase(2, 'Deep Delta Sound Phase')
       .duration(900)
       .beat([6, 0.5])
       .carrier(CARRIERS.warm)
@@ -67,7 +67,7 @@ export const neuroAnalgesia: ProtocolSpec = {
       .deepOverlayOctaves()
       .harmonics()
       .stochasticJitter(15)
-      .purpose('Sustained delta entrainment for endorphin cascade and pain gate interruption')
+      .purpose('Present slower beat and noise layers without claiming analgesia')
       .build(),
 
     phase(3, 'Gentle Return')
@@ -76,13 +76,13 @@ export const neuroAnalgesia: ProtocolSpec = {
       .carrier(CARRIERS.warm)
       .noise('pink', 0.08)
       .gentleCarrierOctaves()
-      .purpose('Gradual return to restful alpha; lock in pain relief')
+      .purpose('Gradually transition back toward an 8 Hz beat')
       .build(),
   ],
   breathwork: {
     name: 'Pain Release Breath',
     ratio: [4, 4, 8, 0],
-    description: 'Deep inhale 4ct, hold 4ct, very slow exhale 8ct. Long exhale triggers vagal pain suppression.',
+    description: 'Deep inhale 4ct, hold 4ct, very slow exhale 8ct. Long exhale is presented as a comfortable-paced breathing cue, not a treatment.',
     cycleDuration: 16,
     syncToBeat: false,
   },
@@ -95,13 +95,13 @@ export const neuroAnalgesia: ProtocolSpec = {
     delivery: 'internal',
   },
   contraindications: {
-    absolute: ['None identified in literature'],
+    absolute: ['Seizure history: consult a clinician before rhythmic audio/visual stimulation'],
     relative: ['Acute injury (see physician first)', 'Post-surgical (wait for clearance)'],
-    drugInteractions: ['Safe alongside analgesics', 'May reduce need for pain medication over time (consult physician)'],
-    specialPopulations: ['Safe during pregnancy', 'Safe for elderly'],
+    drugInteractions: ['Medication interactions have not been specifically tested.'],
+    specialPopulations: ['Safety during pregnancy and in vulnerable populations is not established.'],
   },
-  expectedTimeline: 'Session 1: 25-40% pain reduction. Week 2: Carry-over relief 4-8 hours. Week 4: 40-50% baseline reduction. Week 8+: 50-60% sustained relief. Medication reduction possible with physician guidance.',
-  frequencyOfUse: 'Acute pain: Daily or as needed. Chronic management: 5-7x/week. Maintenance: 3-4x/week.',
+  expectedTimeline: "No established clinical response timeline or pain-reduction percentage; do not change medication use on this basis.",
+  frequencyOfUse: "No clinically validated listening dose or maintenance schedule; stop for hearing or sensory discomfort.",
   optimalTiming: 'Morning for daytime pain management; evening for sleep-disrupting pain',
   masterGain: DSP_DEFAULTS.masterGain,
   sampleRate: 48000,
@@ -116,17 +116,18 @@ export const anxietyRelief: ProtocolSpec = {
   category: 'suffering_reduction',
   version: '2.0.0',
   durationSeconds: 1200,
-  evidenceLevel: 'II',
+  evidenceLevel: "III",
+  evidenceGrade: "C", // conservative metadata pending protocol-specific validation
+  contraindicationsSeverity: "severe",
   citations: [
-    'Chaieb, L. et al. (2015) "Auditory Beat Stimulation and Mood States." Front Psychiatry, 6, 70',
-    'Garcia-Argibay, M. et al. (2019) "Binaural beat effects on anxiety." Psychol Research',
-    'Padmanabhan, R. et al. (2005) "Pre-operative anxiety reduction with 6Hz entrainment"',
+    "Padmanabhan, R., Hildreth, A. J., & Laws, D. (2005). A prospective, randomised, controlled study examining binaural beat audio and pre-operative anxiety. Anaesthesia, 60, 874-877. DOI 10.1111/j.1365-2044.2005.04287.x (different stimulus/population).",
+    "Garcia-Argibay, M., Santed, M. A., & Reales, J. M. (2019). Efficacy of binaural auditory beats in cognition, anxiety, and pain perception: a meta-analysis. Psychological Research, 83, 357-372. DOI 10.1007/s00426-018-1066-8 (heterogeneous audio, not SynSync).",
   ],
-  usageGoal: 'Reduce anxiety 40-60% within session. Fear extinction by week 4. Effect comparable to benzodiazepines without dependency.',
-  algorithmDescription: 'Alpha-to-theta descent with Solfeggio fear extinction stack (396Hz + 417Hz + 528Hz). Activates parasympathetic nervous system via vagal brake engagement. Harmonic stacking prevents habituation.',
-  researchContext: 'Garcia-Argibay (2019) confirmed significant anxiety reduction with binaural beats, effect sizes comparable to benzodiazepines. Padmanabhan (2005) demonstrated 26% reduction in pre-operative anxiety with 6Hz entrainment. Mechanism: direct vagal stimulation + amygdala threat-detection override via Solfeggio stack.',
+  usageGoal: "Exploratory calming audio intended for stress-oriented listening; not an anxiety-disorder treatment or a replacement for medication.",
+  algorithmDescription: "Staged alpha-to-theta beat changes with 396/417/528 Hz tonal overlays, noise shaping and spatial motion; physiological or fear-extinction effects are not established.",
+  researchContext: "Padmanabhan et al. (2005) studied a different 30-minute binaural soundtrack in pre-operative anxiety; Garcia-Argibay et al. (2019) reviewed diverse binaural-beat studies. Neither tested this 20-minute formulation or established drug equivalence.",
   targetBands: ['alpha', 'theta'],
-  neurochemistryTargets: ['GABA ↑↑', 'Cortisol ↓↓', 'Serotonin ↑', 'Norepinephrine ↓'],
+  neurochemistryTargets: [], // no direct biological assays
   phases: [
     phase(0, 'Alpha-to-Theta Descent with Solfeggio')
       .duration(600)
@@ -138,7 +139,7 @@ export const anxietyRelief: ProtocolSpec = {
       .carrierOctaves({ enabled: true, octavesAbove: 1, octavesBelow: 0, gainRolloff: 0.6, detuneSpread: 4 })
       .deepOverlayOctaves()
       .spatial('rotate', 0.05)
-      .purpose('Gentle shift from stress → calm; Solfeggio stack begins amygdala reset')
+      .purpose('Introduce descending 8-to-6 Hz beat with tonal overlays')
       .build(),
 
     phase(1, 'Deep Theta Stabilization')
@@ -151,13 +152,13 @@ export const anxietyRelief: ProtocolSpec = {
       .deepCarrierOctaves()
       .deepOverlayOctaves()
       .stochasticJitter(10)
-      .purpose('Sustained relaxation & fear circuit reset; stochastic jitter prevents habituation')
+      .purpose('Sustain a 4.5 Hz beat with noise and stochastic modulation')
       .build(),
   ],
   breathwork: {
     name: 'Physiological Sigh',
     ratio: [2, 0, 6, 0],
-    description: 'Double inhale, very long exhale. Offloads CO2 rapidly — key to panic relief. Long exhale triggers vagal brake.',
+    description: 'Double inhale, very long exhale. Comfortable breathing cue; stop if the breathing pattern causes dizziness or distress.',
     cycleDuration: 8,
     syncToBeat: false,
   },
@@ -170,13 +171,13 @@ export const anxietyRelief: ProtocolSpec = {
     delivery: 'whispered',
   },
   contraindications: {
-    absolute: [],
-    relative: [],
-    drugInteractions: ['Safe with anxiolytics (no drug interactions)', 'Safe during pregnancy'],
-    specialPopulations: ['Safe for all populations'],
+    absolute: ['Seizure history: seek medical guidance before rhythmic audio or flashing visuals'],
+    relative: ['Stop for dizziness, distress, tinnitus or sensory discomfort'],
+    drugInteractions: ['Interactions with anxiety medicines have not been clinically evaluated.'],
+    specialPopulations: ['Safety in pregnancy, minors or vulnerable populations is not established.'],
   },
-  expectedTimeline: 'Session 1: -40-60% anxiety during protocol. Week 1: 3-6hr carry-over. Week 2-3: Lower baseline. Week 4+: Significant panic reduction.',
-  frequencyOfUse: 'Acute: Daily or as needed (safe multiple times/day). Generalized: 5-7x/week. Maintenance: 3-4x/week.',
+  expectedTimeline: "No clinically established time to improvement or percentage reduction for this exact audio program.",
+  frequencyOfUse: "No validated dose or proof that repeated daily sessions are safe for all individuals; use conservatively.",
   optimalTiming: 'As needed; morning for anticipatory anxiety, evening for rumination',
   masterGain: DSP_DEFAULTS.masterGain,
   sampleRate: 48000,
@@ -281,21 +282,21 @@ export const deepSleep: ProtocolSpec = {
 // ─── 4. Mood Elevator v4 (Depression Countermeasures) ────────────────
 export const moodElevator: ProtocolSpec = {
   id: 'mood_elevator_v4',
-  name: 'Mood Elevator v4 (Depression Countermeasures)',
+  name: "Mood Elevator v4 (Exploratory)",
   category: 'suffering_reduction',
   version: '2.0.0',
   durationSeconds: 1200,
-  evidenceLevel: 'II',
+  evidenceLevel: "V",
+  evidenceGrade: "D", // conservative metadata pending protocol-specific validation
+  contraindicationsSeverity: "severe",
   citations: [
-    'Chaieb, L. et al. (2015) "Auditory Beat Stimulation and Mood States." Front Psychiatry',
-    'Volkow, N. & Yin, H. (2004) "Dopamine circuit dysfunction in depression"',
-    'Kringelbach, M. & Berridge, K. (2009) "Reward processing and pleasure systems"',
+
   ],
-  usageGoal: 'Immediate mood improvement. 30-50% motivation increase by week 6. Re-engage dopamine reward circuits.',
-  algorithmDescription: 'Mid-beta (14-18Hz) stimulation activates VTA dopamine production and prefrontal goal-oriented thinking. Beta-gamma cascade re-engages reward circuits dormant in depression. Solfeggio 528+639Hz overlay for emotional transformation.',
-  researchContext: 'Depression involves dopamine circuit dysfunction — VTA underactive, reward circuits less responsive. Beta frequencies (14-18Hz) directly activate the dopamine reward system and prefrontal cortex simultaneously, re-engaging motivation and pleasure circuits.',
+  usageGoal: "Speculative mood-oriented listening experience, not a treatment for depression; no measured improvement in motivation or mood is established for this program.",
+  algorithmDescription: "Staged alpha-to-beta rhythmic audio with gamma-related overlays and colored noise; no evidence that these tones directly alter dopamine or reward pathways.",
+  researchContext: "EEG rhythm associations do not establish that audible beats treat depression or trigger neurotransmitter changes. No controlled clinical trial of this protocol was verified.",
   targetBands: ['beta', 'gamma'],
-  neurochemistryTargets: ['Dopamine ↑↑↑', 'Serotonin ↑', 'Norepinephrine ↑', 'GABA ↑'],
+  neurochemistryTargets: [], // unmeasured effects
   phases: [
     phase(0, 'Alpha Warm-Up')
       .duration(180)
@@ -303,7 +304,7 @@ export const moodElevator: ProtocolSpec = {
       .carrier(CARRIERS.bright)
       .noise('white', 0.05)
       .gentleCarrierOctaves()
-      .purpose('Gentle activation from low-energy state')
+      .purpose('Present introductory 10 Hz tone and low-level noise')
       .build(),
 
     phase(1, 'Beta Activation')
@@ -315,10 +316,10 @@ export const moodElevator: ProtocolSpec = {
       .carrierOctaves({ enabled: true, octavesAbove: 1, octavesBelow: 1, gainRolloff: 0.7, detuneSpread: 6 })
       .gentleOverlayOctaves()
       .spatial('rotate', 0.12)
-      .purpose('Ramp into beta; dopamine circuits begin activating')
+      .purpose('Gradually shift beat from 10 Hz to 15 Hz')
       .build(),
 
-    phase(2, 'Peak Beta-Gamma Reward Cascade')
+    phase(2, 'Peak Beta-Gamma Beat Phase')
       .duration(420)
       .beat(18)
       .carrier(CARRIERS.bright)
@@ -328,7 +329,7 @@ export const moodElevator: ProtocolSpec = {
       .deepOverlayOctaves()
       .harmonics()
       .hybrid()
-      .purpose('Full dopamine reward circuit activation; sustained motivation pulse')
+      .purpose('Present 18 Hz beat with overlays; neurotransmitters are not measured')
       .build(),
 
     phase(3, 'Sustained Glow')
@@ -337,7 +338,7 @@ export const moodElevator: ProtocolSpec = {
       .carrier(CARRIERS.bright)
       .noise('pink', 0.06)
       .gentleCarrierOctaves()
-      .purpose('Gentle descent to SMR; locks in elevated mood without crash')
+      .purpose('Gradually return from 18 Hz toward 12 Hz')
       .build(),
   ],
   breathwork: {
@@ -356,14 +357,14 @@ export const moodElevator: ProtocolSpec = {
     delivery: 'spoken',
   },
   contraindications: {
-    absolute: ['Uncontrolled bipolar mania (avoid stimulating protocols)'],
+    absolute: ['Uncontrolled bipolar mania (avoid stimulating protocols)', 'Seizure history: consult a clinician before rhythmic stimulation'],
     relative: ['Severe anxiety without depression (use anxiety protocol instead)'],
-    drugInteractions: ['May be synergistic with SSRIs — monitor mood', 'Compatible with most antidepressants'],
+    drugInteractions: ['Medication interactions have not been evaluated for this protocol.'],
     specialPopulations: ['Monitor in adolescents for hyperactivation'],
   },
-  expectedTimeline: 'Session 1: Noticeable mood lift within 10min. Week 1: Carry-over motivation 4-8hr. Week 2-4: Baseline mood improving. Week 6+: 30-50% sustained improvement.',
-  frequencyOfUse: 'Daily during acute depression. 3-5x/week for maintenance.',
-  optimalTiming: 'Midday 12-1 PM (circadian dopamine peak). Follow with rewarding activity within 60min.',
+  expectedTimeline: "No validated clinical outcome, onset time or sustained effect; if depressed, obtain qualified care rather than relying on audio.",
+  frequencyOfUse: "No validated dose or schedule for depression; this is not a replacement for psychotherapy or medication.",
+  optimalTiming: "Use only when comfortable and not engaged in a safety-critical task; avoid activation that interferes with sleep.",
   masterGain: DSP_DEFAULTS.masterGain,
   sampleRate: 48000,
   bitDepth: 24,

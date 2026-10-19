@@ -8,6 +8,7 @@
  */
 
 import type { ProtocolSpec, PhaseSpec, ProtocolCategory } from './dsp/types';
+import { getLegacyProtocolMetadata } from './legacyProtocolMetadata';
 
 // ─── Category → Section Mapping ──────────────────────────────────────
 // Maps DSP ProtocolCategory enum values to UI section strings
@@ -97,10 +98,34 @@ function adaptSpec(spec: ProtocolSpec) {
   const category = EVIDENCE_CATEGORIES[spec.evidenceLevel] ?? 'speculative';
 
   // Flatten contraindications from structured object to string array
-  const contraindications = [
+  const listedCautions = [
     ...spec.contraindications.absolute,
     ...spec.contraindications.relative,
   ];
+  // Empty contraindication arrays are not evidence that an unstudied protocol is safe.
+  const contraindications = listedCautions.length > 0
+    ? listedCautions
+    : ['Protocol-specific contraindications have not been fully reviewed; standard safety screening applies.'];
+
+  // Recovery from the 2026-06-11 desktop/mobile catalog by exact protocol ID.
+  // Never mistake mechanically derived historical letter grades for new RCT evidence.
+  const legacy = getLegacyProtocolMetadata(spec.id);
+  // The older adapter normalized calibration 'Setup' to 'I' in exported JSON.
+  const historicalLevel = spec.evidenceLevel === 'Setup' ? 'I' : spec.evidenceLevel;
+  const sameHistoricalLevel = legacy?.evidenceLevel === historicalLevel;
+  const evidenceGrade = spec.evidenceGrade ?? (sameHistoricalLevel ? legacy?.evidenceGrade : undefined);
+  const minimumCurrentRisk = spec.contraindications.absolute.length > 0
+    ? 'severe' : spec.contraindications.relative.length > 0 ? 'moderate' : 'mild';
+  const severityOrder = { mild: 0, moderate: 1, severe: 2 } as const;
+  const oldRisk = legacy?.contraindicationsSeverity;
+  const conservativeRisk = oldRisk && severityOrder[oldRisk] > severityOrder[minimumCurrentRisk]
+    ? oldRisk : minimumCurrentRisk;
+  const contraindicationsSeverity = spec.contraindicationsSeverity ?? (legacy ? conservativeRisk : undefined);
+  const metadataProvenance = spec.evidenceGrade && spec.contraindicationsSeverity
+    ? 'reviewed-current' as const
+    : legacy && sameHistoricalLevel
+      ? 'legacy-restored-unverified' as const
+      : 'missing' as const;
 
   // Map evidence level: 'Setup' → 'I' so calibration shows in Science mode
   const evidenceLevel = spec.evidenceLevel === 'Setup' ? 'I' as const : spec.evidenceLevel;
@@ -110,6 +135,9 @@ function adaptSpec(spec: ProtocolSpec) {
     title: spec.name,
     description: spec.usageGoal,
     evidenceLevel,
+    evidenceGrade,
+    contraindicationsSeverity,
+    metadataProvenance,
     citation: spec.citations[0] ?? '',
     category,
     section,

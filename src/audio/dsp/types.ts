@@ -187,6 +187,10 @@ export interface ProtocolSpec {
   durationSeconds: number;
   /** Evidence level (I = gold standard, V = speculative) */
   evidenceLevel: EvidenceLevel;
+  /** Explicitly reviewed aggregate evidence-grade metadata (never infer from level). */
+  evidenceGrade?: 'A' | 'B' | 'C' | 'D';
+  /** Explicit protocol-risk label; supplied by reviewers, not assumed by the adapter. */
+  contraindicationsSeverity?: 'mild' | 'moderate' | 'severe';
   /** Primary research citations */
   citations: string[];
   /** User-facing goal description */

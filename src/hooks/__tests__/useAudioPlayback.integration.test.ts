@@ -72,18 +72,18 @@ describe('useAudioPlayback Integration Tests', () => {
         result.current.setVolume(0.75);
       });
 
-      expect(setVolumeSpy).toHaveBeenCalledWith(0.75);
-      expect(result.current.audioState.volume).toBe(0.75);
+      expect(setVolumeSpy).toHaveBeenCalledWith(0.7);
+      expect(result.current.audioState.volume).toBe(0.7);
     });
 
-    it('should clamp volume between 0 and 1', async () => {
+    it('should clamp normalized volume between 0 and 0.7', async () => {
       const { result } = renderHook(() => useAudioPlayback(audioEngine));
 
       act(() => {
         result.current.setVolume(1.5);
       });
 
-      expect(result.current.audioState.volume).toBeLessThanOrEqual(1);
+      expect(result.current.audioState.volume).toBe(0.7);
 
       act(() => {
         result.current.setVolume(-0.5);
