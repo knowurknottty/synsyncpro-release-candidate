@@ -10,7 +10,7 @@
 - **PASS / FAIL:** reserved for genuinely executed checks tied to a revision, invocation, environment and receipt.
 - **BLOCKED:** no current authorized execution capability or target availability.
 
-Source inspection **does not** imply the feature was successfully installed, played, deployed or independently measured.
+Source inspection **does not** imply the feature was successfully installed, played, deployed or independently measured. Four selected literature citations were checked separately against published abstracts/articles, but no full evidence review was performed.
 
 ## Commands: recommended, not executed
 
@@ -43,7 +43,7 @@ Source inspection **does not** imply the feature was successfully installed, pla
 | C10 | WAV exporter calls offline render/encode | `components/WavExporter.tsx:27-56` | SOURCE PRESENT |
 | C11 | PWA manifest and v12 cache logic present | `public/manifest.json`, `sw.js` | SOURCE PRESENT |
 | C12 | Source has protocol plans and a validator | `src/services/PlanValidator.ts`, `src/services/PlanDatabase.ts` | SOURCE PRESENT; MAIN UI REACHABILITY UNVERIFIED |
-| C13 | Evidence registry includes modalities requiring extrapolation review | `src/specs/protocol-evidence-registry.ts` | SOURCE PRESENT; INDEPENDENT STUDY REVIEW NOT RUN |
+| C13 | Evidence registry contains stimulus-modality, study-design and attribution discrepancies in sampled references | `src/specs/protocol-evidence-registry.ts`; primary-source links in source audit | SOURCE PRESENT; FOUR-ENTRY SPOT-CHECK PARTIAL |
 | C14 | Signed release not completed in provenance file | `PROVENANCE.md`, `LICENSE.md` | SOURCE PRESENT |
 | C15 | No claim of clinical outcome verified by this mission | scope of executed evidence | NOT RUN |
 
@@ -62,7 +62,8 @@ Three passes above describe **actual revisions of the documentation concepts**, 
 - [ ] Check **every relative link and anchor** in a current checkout or static parser.
 - [ ] Run prose Markdown lint or an approved house style checker.
 - [ ] Execute install, type-check, tests, protocol check, build and browser E2E at the final docs SHA.
-- [ ] Review medical/clinical claims against primary studies and exact stimulus types.
+- [x] Spot-check four selected bibliographic references against published primary/review sources (2026-10-19; **PARTIAL**).
+- [ ] Complete systematic primary-source, modality-equivalence and clinical-claims review of the entire registry.
 - [ ] Confirm mobile and PWA cross-browser support with device receipts.
 - [ ] Resolve P0-01 gain discrepancy and P1-04 bridge safety gap in product code.
 - [ ] Run privacy/network trace and confirm deletion/export across all browser stores.
