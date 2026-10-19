@@ -1,13 +1,13 @@
 # SynSync Pro — Project Instructions
 
 ## Project Overview
-Clinical-grade brainwave entrainment application. TypeScript + React + Web Audio API.
+Pre-release neuroacoustic research/wellness application. TypeScript + React + Web Audio API. Clinical efficacy, medical-device status, and hearing-level certification are NOT established by this repository.
 This software generates audio that directly affects neurological states. Correctness is not optional — bugs in the audio pipeline can cause adverse physiological responses.
 
 ## Architecture
 - Pipeline: ProtocolSpec → AudioGraphPlan → AudioGraphRuntime
 - Multi-modal entrainment: binaural beats, isochronic tones, amplitude modulation, spatial audio
-- 81+ evidence-based protocols across sleep, cognition, trauma processing, consciousness exploration
+- A broad mixed-evidence protocol library across sleep, cognition, and exploratory applications; inclusion is NOT proof that a specific audio protocol has clinical evidence
 - Clinical safety layer with parameter validation, seizure safety protocols, and graceful degradation
 
 ## Stack
@@ -18,7 +18,7 @@ This software generates audio that directly affects neurological states. Correct
 
 ## Critical Safety Constraints
 - **Seizure safety**: All frequency transitions must respect ramp rate limits. No instantaneous frequency jumps >2Hz in the 3-30Hz range. Validate in ProtocolSpec before reaching AudioGraph.
-- **Volume safety**: Hard ceiling at 0.7 amplitude. Never exceed. Graceful degradation to silence, never to noise.
+- **Master-gain safety**: Normalize ALL live/UI/bridge/offline master-gain requests to 0.0–0.7 using `src/audio/safetyLimits.ts`; nonfinite values fail closed to silence. This is NOT a calibrated 0.7 output peak, physical dB SPL ceiling, or hearing-safety certification. Independently monitor/export-check DSP peak/clipping and acoustic exposure; never increase volume to compensate for a software limit.
 - **Parameter validation**: Every protocol parameter must be validated at the ProtocolSpec layer. Invalid parameters fail loudly at build time, not silently at runtime.
 - **Graceful degradation**: If any audio node fails, the entire graph must tear down cleanly. No orphaned oscillators. No dangling connections. Silence is always the safe fallback.
 
@@ -38,7 +38,7 @@ This software generates audio that directly affects neurological states. Correct
 - Audio DSP: `audio/` — AudioWorklet processors and graph builders
 
 ## Protocol Data Integrity
-- Every protocol must reference specific citations. No "studies suggest" in any user-facing content.
+- Every marketed evidence-based outcome requires traceable, intervention-equivalent primary sources. No unverified efficacy claims or cross-modality percentage transfer. No "studies suggest" without specific citations in user-facing content.
 - Evidence levels (I-V) must be assigned per protocol and backed by traceable references.
 - New protocols require: citation validation, parameter safety check, and integration test with the audio pipeline.
 

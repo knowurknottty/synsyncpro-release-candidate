@@ -211,8 +211,8 @@ export const PROTOCOL_EVIDENCE_REGISTRY: ProtocolEvidenceSpec[] = [
         id: 'adhd-symptom-reduction',
         claim: 'Reduces ADHD symptoms',
         allowedWording: [
-          'may support attention and impulse control',
-          'designed to strengthen focus circuits',
+          'exploratory focus-oriented listening experience; outcomes vary',
+          'designed to present an SMR/gamma-range rhythmic audio pattern',
           'exploratory audio design inspired by frequency bands studied in EEG research',
         ],
         forbiddenWording: [
