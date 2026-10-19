@@ -194,6 +194,8 @@ export interface Protocol {
   // Clinical metadata
   evidenceLevel?: EvidenceLevel;
   evidenceGrade?: 'A' | 'B' | 'C' | 'D';
+  /** Recovered grades remain provisional until independently checked. */
+  metadataProvenance?: 'reviewed-current' | 'legacy-restored-unverified' | 'missing';
   mechanismOfAction?: string;
   
   // Safety

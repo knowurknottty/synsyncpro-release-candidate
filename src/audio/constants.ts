@@ -54,6 +54,7 @@ type RawProtocol = {
   breathwork?: Protocol['breathwork'];
   mantra?: Protocol['mantra'];
   evidenceGrade?: Protocol['evidenceGrade'];
+  metadataProvenance?: Protocol['metadataProvenance'];
   mechanismOfAction?: string;
   contraindicationsSeverity?: Protocol['contraindicationsSeverity'];
   expectedOnset?: number;
