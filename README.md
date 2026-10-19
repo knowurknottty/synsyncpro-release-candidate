@@ -1,5 +1,7 @@
 # SynSync Pro — Release Candidate / Public Proof Surface
 
+> **Start here:** [Documentation map](docs/README.md) · [Quickstart](docs/QUICKSTART.md) · [User guide](docs/USER_GUIDE.md) · [Safety/evidence](docs/SAFETY_AND_EVIDENCE.md) · [Technical manual](docs/TECHNICAL_MANUAL.md) · [Repository audit](docs/REPOSITORY_AUDIT_2026-10-19.md)
+
 SynSync Pro in this repository is the **public release-candidate and engineering-proof surface** for Inversion Labs.
 
 > **Repository authority:** this is **not** the canonical production Web/PWA source. The canonical Web/PWA repository is [`knowurknottty/synsyncpro_v1`](https://github.com/knowurknottty/synsyncpro_v1). Use this repository for the release-candidate/provenance history and its proof surface; do not point production deployment at it.
