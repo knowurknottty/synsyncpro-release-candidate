@@ -22,6 +22,7 @@ import {
   LIMITER_KNEE
 } from '../types';
 import { ProtocolVault } from './ProtocolVault';
+import { MAX_MASTER_GAIN, clampMasterGain } from '../src/audio/safetyLimits';
 
 // FIX imports — v2.0 DSP improvements
 import { generateNoiseBuffers, startNoiseFromBuffers, type NoiseBuffers } from '../src/audio/dsp/noise-generator';
@@ -135,7 +136,7 @@ export class AudioEngine {
     
     // Master gain (initial volume 0.7)
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = 0.7;
+    this.masterGain.gain.value = MAX_MASTER_GAIN;
     
     // Brickwall limiter with soft knee (UPGRADE 8)
     this.limiter = this.ctx.createDynamicsCompressor();
@@ -969,7 +970,7 @@ export class AudioEngine {
 
   setVolume(volume: number): void {
     if (!this.masterGain || !this.ctx) return;
-    const clamped = Math.max(0, Math.min(1, volume));
+    const clamped = clampMasterGain(volume);
     this.masterGain.gain.setTargetAtTime(clamped, this.ctx.currentTime, 0.02);
   }
 
@@ -994,7 +995,9 @@ export class AudioEngine {
 
     // Master gain + limiter chain
     const masterGain = offlineCtx.createGain();
-    masterGain.gain.value = MAX_AMPLITUDE;
+    // Offline output also uses the normalized master-gain cap; final sample peaks
+    // and real-world acoustic SPL require separate checks/calibration.
+    masterGain.gain.value = MAX_MASTER_GAIN;
     const limiter = offlineCtx.createDynamicsCompressor();
     limiter.threshold.value = LIMITER_THRESHOLD;
     limiter.knee.value = LIMITER_KNEE;

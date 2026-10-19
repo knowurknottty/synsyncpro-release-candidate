@@ -1,4 +1,5 @@
 import React from 'react';
+import { MAX_MASTER_GAIN } from '../src/audio/safetyLimits.ts';
 import { X, Settings as SettingsIcon, Eye, EyeOff, Volume2, Palette, Headphones, Zap, Download, Shield, User } from 'lucide-react';
 import { UIMode } from '../src/labels';
 
@@ -238,7 +239,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 id="default-volume"
                 type="range"
                 min="0"
-                max="1"
+                max={MAX_MASTER_GAIN}
                 step="0.05"
                 value={defaultVolume}
                 onChange={(e) => onDefaultVolumeChange(parseFloat(e.target.value))}
@@ -246,7 +247,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 aria-label="Default volume slider"
               />
               <p className="text-xs text-gray-500">
-                Starting volume for all sessions (0.7 safety limit enforced)
+                Normalized master gain is limited to 0.7; actual listening level depends on your device
               </p>
             </div>
 

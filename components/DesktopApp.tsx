@@ -37,6 +37,7 @@ import { WavExporter } from './WavExporter.tsx';
 import { Logo } from './Logo.tsx';
 import { UserProfile } from './UserProfile.tsx';
 import { AudioEngine } from '../services/AudioEngine.ts';
+import { MAX_MASTER_GAIN } from '../src/audio/safetyLimits.ts';
 import { ProtocolVault } from '../services/ProtocolVault.ts';
 
 interface DesktopAppProps {
@@ -295,7 +296,7 @@ const DesktopAppComponent: React.FC<DesktopAppProps> = ({
               <input
                 type="range"
                 min="0"
-                max="1"
+                max={MAX_MASTER_GAIN}
                 step="0.01"
                 value={audioState.volume}
                 onChange={(e) => onVolumeChange(parseFloat(e.target.value))}

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { AudioEngine } from '../../services/AudioEngine.ts';
+import { MAX_MASTER_GAIN, clampMasterGain } from '../audio/safetyLimits.ts';
 import { Protocol, AudioState } from '../../types.ts';
 
 export function useAudioPlayback(audioEngine: AudioEngine) {
@@ -8,7 +9,7 @@ export function useAudioPlayback(audioEngine: AudioEngine) {
     isPaused: false,
     currentProtocolId: null,
     currentPhaseIndex: 0,
-    volume: 0.7,
+    volume: MAX_MASTER_GAIN,
   });
 
   // Set up audio engine callbacks
@@ -102,7 +103,7 @@ export function useAudioPlayback(audioEngine: AudioEngine) {
 
   const setVolume = useCallback((volume: number) => {
     try {
-      const clampedVolume = Math.max(0, Math.min(1, volume));
+      const clampedVolume = clampMasterGain(volume);
       audioEngine.setVolume(clampedVolume);
       setAudioState(s => ({ ...s, volume: clampedVolume }));
     } catch (error) {

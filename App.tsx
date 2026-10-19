@@ -16,6 +16,7 @@ import { DataExportPanel } from './components/DataExportPanel.tsx';
 import { UserProfile } from './components/UserProfile.tsx';
 import { AccessKeyService } from './services/AccessKeyService.ts';
 import { installFrankenCAPTBridge } from './src/frankencapt/index.ts';
+import { clampMasterGain } from './src/audio/safetyLimits.ts';
 
 /**
  * Main App Component
@@ -97,7 +98,7 @@ const App: React.FC = () => {
     () => localStorage.getItem('synsync_scanlines') !== 'false'
   );
   const [defaultVolume, setDefaultVolume] = useState<number>(
-    () => parseFloat(localStorage.getItem('synsync_default_volume') || '0.5')
+    () => clampMasterGain(parseFloat(localStorage.getItem('synsync_default_volume') || '0.5'))
   );
   const [headphoneWarning, setHeadphoneWarning] = useState<boolean>(
     () => localStorage.getItem('synsync_headphone_warning') !== 'false'
@@ -242,7 +243,7 @@ const App: React.FC = () => {
     onSafetyCleared: handleSafetyCleared,
     onScanlinesToggle: setScanlinesEnabled,
     onReduceMotionToggle: setReduceMotion,
-    onDefaultVolumeChange: setDefaultVolume,
+    onDefaultVolumeChange: (gain: number) => setDefaultVolume(clampMasterGain(gain)),
     onHeadphoneWarningToggle: setHeadphoneWarning,
   };
 
@@ -295,7 +296,7 @@ const App: React.FC = () => {
         onUiModeChange={setUiMode}
         onScanlinesToggle={setScanlinesEnabled}
         onReduceMotionToggle={setReduceMotion}
-        onDefaultVolumeChange={setDefaultVolume}
+        onDefaultVolumeChange={(gain) => setDefaultVolume(clampMasterGain(gain))}
         onThemeChange={toggleTheme}
         onHeadphoneWarningToggle={setHeadphoneWarning}
         onOpenDataExport={() => open('dataExport')}
