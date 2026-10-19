@@ -16,6 +16,17 @@ Capture: source commit and protocol ID; normalized phase parameters and timing; 
 
 These layers are **not interchangeable**. Do not take a percentage from an EEG neurofeedback study and label it the predicted change from auditory entrainment. Distinguish a frequency-following response from a therapeutic effect.
 
+## Targeted primary-literature audit — examples confirmed 2026-10-19
+
+The source registry is not safe to treat as an independently checked clinical bibliography. A **limited four-entry spot-check** found:
+
+- [Marshall et al., *Nature* (2006)](https://www.nature.com/articles/nature05278) studied **transcranial electrical slow-oscillation stimulation**, not binaural auditory beats. Matching nominal frequency alone cannot transfer the study's memory or sleep outcome.
+- [Fan and colleagues, *Scientific Reports* (2024)](https://www.nature.com/articles/s41598-024-76059-9), DOI 10.1038/s41598-024-76059-9, is attributed in the registry to “Rimmele et al.” It reported a limited daytime-nap sleep-stage latency finding with 0.25-Hz binaural beats, but not significant evidence of EEG entrainment at that frequency.
+- [Lubar & Shouse, 1976 (PMID 990355)](https://pubmed.ncbi.nlm.nih.gov/990355/) documents preliminary **single-child EEG neurofeedback**, not a randomized trial of audio; any reported ADHD effects are not an estimate for SynSync's sound.
+- The [84-study integrative review (PMID 39699823)](https://pubmed.ncbi.nlm.nih.gov/39699823/), DOI 10.1007/s10484-024-09682-x, is credited to **Cidral-Filho, Porter and Donatello**, not the “Jirakittayakorn & Wongsawat” authors assigned to the 84-study review in the registry.
+
+These are **specific citation/interpretation corrections**, not an exhaustive review or disproof of all auditory entrainment effects. See [source audit](REPOSITORY_AUDIT_2026-10-19.md) for severity, code references and remediation guidance. The data registry itself was not modified.
+
 ## Proposed validation ladder
 
 - **A. DSP bench:** verify signal frequencies, modulation depths, phase changes, ramp transients, noise spectra, peak/RMS/loudness and clipping using repeatable offline renders.
