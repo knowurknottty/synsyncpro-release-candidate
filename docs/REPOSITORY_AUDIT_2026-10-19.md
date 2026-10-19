@@ -22,7 +22,20 @@ Repo-local `CLAUDE.md` was inspected. No `AGENTS.md` appeared in the reported tr
 - **Evidence:** `src/specs/protocol-evidence-registry.ts` cites slow-oscillation electrical stimulation and neurofeedback studies while interpreting effects for auditory protocols. It includes numerical estimates described as protocol-facing effect sizes and claims of comparable mechanisms.
 - **Risk:** presenting EEG neurofeedback, electrical stimulation, or other modalities as direct evidence for specific synthesized audio sessions can mislead users, practitioners and marketers.
 - **Action:** perform a primary-literature and protocol-equivalence review. Attach exact acoustic stimulus, sample, outcome, counterfactual, study design and DOI to every public claim; prohibit transferring percentages between different interventions.
-- **Status:** source wording confirmed; cited studies, effect sizes and downstream marketing **not independently checked**.
+- **Status:** source wording confirmed; four high-priority cited entries independently spot-checked (see table above); remaining references, effect sizes and downstream marketing **not exhaustively checked**.
+
+#### Targeted external citation verification (2026-10-19; PARTIAL)
+
+A bounded primary-source spot-check against four entries in `src/specs/protocol-evidence-registry.ts` identified discrepancies important enough to block direct reuse of the registry's affected clinical/marketing claims:
+
+| Registry reference or claim | Verified external reference | Impact / needed correction |
+| --- | --- | --- |
+| Marshall et al. (2006), DOI [10.1038/nature05278](https://www.nature.com/articles/nature05278), cited as proof of *auditory delta entrainment* | The study applied **transcranial slow-oscillating electrical stimulation** during sleep; this is not binaural/isochronic audio. | Reclassify as non-equivalent mechanistic context; do not attribute its memory/sleep outcome to SynSync audio. |
+| “Rimmele et al. (2024)” on 0.25-Hz binaural beats, DOI [10.1038/s41598-024-76059-9](https://www.nature.com/articles/s41598-024-76059-9) | The paper's authors include **Fan, Zhu and Suzuki**; it studied a **small daytime-nap sample (12 participants)**. It reported shorter latency to some sleep stages, but did **not** demonstrate statistically significant stimulation-frequency EEG entrainment. | Correct attribution and restrict the endpoint claim; do not describe the paper as confirmation of generalized delta entrainment. |
+| Lubar & Shouse (1976), [PMID 990355](https://pubmed.ncbi.nlm.nih.gov/990355/), labeled “landmark RCT” for 40–50% ADHD reduction | The original report concerns EEG biofeedback of **a hyperkinetic child** and explicitly calls itself **a preliminary report**; this was not a randomized controlled trial of auditory beats. | Remove RCT classification and do not transfer a neurofeedback outcome percentage to SynSync audio. |
+| “Jirakittayakorn & Wongsawat (2025), 84-study integrative review” | The identified [84-study integrative review (PMID 39699823)](https://pubmed.ncbi.nlm.nih.gov/39699823/) is by **Cidral-Filho, Porter and Donatello**, DOI [10.1007/s10484-024-09682-x](https://doi.org/10.1007/s10484-024-09682-x). | Review appears misattributed in registry; reconcile source identification, included modalities, evidence quality and disclosures before reuse. |
+
+This is **not** an exhaustive bibliographic or efficacy review; four examples were spot-checked. The external findings support correcting citation metadata and limiting claims, not concluding that all entrainment research is invalid. The registry, production content and protocol UI were **not** changed by this documentation mission.
 
 ### SYN-DOC-P1-03 — premature clinical-grade characterization (OBSERVED)
 
@@ -90,6 +103,6 @@ Repo-local `CLAUDE.md` was inspected. No `AGENTS.md` appeared in the reported tr
 
 ## What has *not* been proven
 
-No full static/dynamic security penetration test, exhaustive source-line review, npm dependency audit, live audio measurements, multi-browser device lab, remote deployment review, independent clinical evidence review, license approval or production release validation was performed. No tests in this document are marked PASS.
+No full static/dynamic security penetration test, exhaustive source-line review, npm dependency audit, live audio measurements, multi-browser device lab, remote deployment review, **complete** independent clinical evidence review (only four bibliographic entries spot-checked), license approval or production release validation was performed. No tests in this document are marked PASS.
 
 **Related:** [Evidence and verification ledger](VERIFICATION_MATRIX.md), [Safety](SAFETY_AND_EVIDENCE.md), [Technical manual](TECHNICAL_MANUAL.md).
