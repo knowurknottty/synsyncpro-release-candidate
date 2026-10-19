@@ -55,7 +55,7 @@ export const neuroAnalgesia: ProtocolSpec = {
       .purpose('Gradually shift beat from 10 Hz toward 6 Hz')
       .build(),
 
-    phase(2, 'Deep Delta Pain Relief')
+    phase(2, 'Deep Delta Sound Phase')
       .duration(900)
       .beat([6, 0.5])
       .carrier(CARRIERS.warm)
@@ -313,7 +313,7 @@ export const moodElevator: ProtocolSpec = {
       .purpose('Gradually shift beat from 10 Hz to 15 Hz')
       .build(),
 
-    phase(2, 'Peak Beta-Gamma Reward Cascade')
+    phase(2, 'Peak Beta-Gamma Beat Phase')
       .duration(420)
       .beat(18)
       .carrier(CARRIERS.bright)
