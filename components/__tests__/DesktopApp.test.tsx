@@ -280,8 +280,9 @@ describe('DesktopApp', () => {
     it('should call onVolumeChange when volume changes', () => {
       render(<DesktopApp {...defaultProps} />);
       const volumeInput = screen.getByRole('slider', { name: /Master volume/i });
-      fireEvent.change(volumeInput, { target: { value: '0.75' } });
-      expect(defaultProps.onVolumeChange).toHaveBeenCalledWith(0.75);
+      fireEvent.change(volumeInput, { target: { value: '0.7' } });
+      expect(defaultProps.onVolumeChange).toHaveBeenCalledWith(0.7);
+      expect(volumeInput).toHaveAttribute('max', '0.7');
     });
   });
 
